@@ -56,7 +56,7 @@
       border-radius:10px; padding:10px 12px; margin:10px 0; display:none;
     }
 
-    /* Progress */
+    /* Progress (sticky) */
     .progress-card .steps { display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 0; padding:0; list-style:none; }
     .step {
       display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line);
@@ -69,6 +69,15 @@
     .bar { height:10px; border-radius:999px; background:#e5e7eb; overflow:hidden; }
     .fill { height:100%; width:0%; background:var(--accent); transition:width .25s ease; }
     .pct { font-weight:700; color:#111827; }
+
+    .sticky {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
   </style>
 </head>
 <body>
@@ -82,8 +91,8 @@
       Ensure all pasted links are publicly viewable (no login required).
     </div>
 
-    <!-- Progress -->
-    <div class="card progress-card" aria-live="polite">
+    <!-- Progress (sticky) -->
+    <div id="progressCard" class="card progress-card sticky" aria-live="polite">
       <div class="row" style="justify-content:space-between;align-items:center;">
         <strong>Submission Progress:</strong>
         <span class="pct" id="pctLabel">0%</span>
@@ -177,7 +186,7 @@
             <strong>Required sections:</strong>
             <ul class="steps">
               <li><b>Overview</b> of the app and its functionality</li>
-              <li><b>Development process</b> &amp; <b>challenges</b> + <b>solutions</li>
+              <li><b>Development process</b> &amp; <b>challenges</b> + <b>solutions</b></li>
               <li><b>Advanced iOS feature</b> description (what, why, how)</li>
               <li><b>Reflection</b> on learning outcomes</li>
             </ul>
@@ -242,14 +251,19 @@
       </ol>
       <hr>
 
-      <label>MVP Sheet – Direct Image Link (.jpg or .png)</label>
-      <input id="mvp_image" type="text" placeholder="https://i.imgur.com/xyz123.png" />
-      <div id="hint_mvp_image" class="hint">Direct image URL required (.jpg/.png). Openable without login.</div>
+      <label>MVP Sheet – Imgur Link (album/image) <em>or</em> Direct Image (.jpg/.png)</label>
+      <input id="mvp_image" type="text" placeholder="https://imgur.com/a/gPKTUvE  or  https://i.imgur.com/xyz123.png" />
+      <div id="hint_mvp_image" class="hint">Provide a public Imgur album/image link or a direct .jpg/.png URL that opens without login.</div>
       <ol class="steps help" style="margin-top:6px;">
         <li>Take a clear photo/screenshot and <b>crop</b> to <b>only</b> the MVP content.</li>
         <li>Upload to <a href="https://imgur.com/upload" target="_blank" rel="noopener">imgur.com/upload</a> (no account required).</li>
-        <li>Copy the <b>Direct Image Link</b> (URL ending in <code>.jpg</code> or <code>.png</code>), not an album/page.</li>
-        <li>Test in incognito; must open without login. Paste here.</li>
+        <li>You may paste either:
+          <ul>
+            <li>an <b>Imgur album/image page</b> link (e.g., <code>https://imgur.com/a/XXXXX</code>), or</li>
+            <li>a <b>direct image</b> URL ending in <code>.jpg</code> / <code>.png</code>.</li>
+          </ul>
+        </li>
+        <li>Test in incognito; it must open without login. Paste here.</li>
       </ol>
     </div>
 
@@ -295,6 +309,7 @@
     const urlish = s => /^https?:\/\/[^\s]+$/i.test(s.trim());
     const isYouTube = s => /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(s.trim());
     const isImgDirect = s => /^https?:\/\/[^\s]+?\.(png|jpg|jpeg)$/i.test(s.trim());
+    const isImgur = s => /^https?:\/\/(i\.)?imgur\.com\/.+/i.test(s.trim()); // allow album/page or direct
     const commitShaFromUrl = s => {
       const m = s.match(/\/commit\/([0-9a-f]{7,40})/i) || s.match(/[?&]h=([0-9a-f]{7,40})/i);
       return m ? m[1] : "";
@@ -352,9 +367,10 @@
       const github = val('github_commit_url');
       const yt = val('youtube_unlisted');
       const img = val('mvp_image');
+      const imgOk = (urlish(img) && (isImgur(img) || isImgDirect(img)));
       return urlish(github) && !!commitShaFromUrl(github) &&
              urlish(yt) && isYouTube(yt) &&
-             urlish(img) && isImgDirect(img);
+             imgOk;
     }
     function checkDeclaration(){
       return $('accept_decl').checked;
@@ -369,7 +385,6 @@
       ];
       const completed = steps.filter(s=>s.done).length;
       const allValid = completed === steps.length;
-      // "Ready" step is true only when all are valid
       const ready = allValid;
       const totalSteps = steps.length + 1; // + 'ready'
       const pct = Math.round(((completed + (ready?1:0)) / totalSteps) * 100);
@@ -428,9 +443,10 @@
       }
 
       const img = val('mvp_image');
-      if(!urlish(img) || !isImgDirect(img)){
-        errors.push('Invalid MVP image direct link (.jpg/.png)');
-        setInvalid('mvp_image','hint_mvp_image',true,'Provide a direct .jpg/.png URL that opens without login.', silent);
+      const imgOk = urlish(img) && (isImgur(img) || isImgDirect(img));
+      if(!imgOk){
+        errors.push('Invalid MVP link (use Imgur album/image URL or direct .jpg/.png)');
+        setInvalid('mvp_image','hint_mvp_image',true,'Provide a public Imgur link or a direct .jpg/.png URL.', silent);
       } else {
         setInvalid('mvp_image','hint_mvp_image',false,'', silent);
       }
@@ -509,8 +525,8 @@
     }
 
     function generate(){
-      submittedOnce = true;               // show panels/hints on first attempt
-      if(!validate(false)){               // not valid -> block generation
+      submittedOnce = true;
+      if(!validate(false)){
         $('compatOut').textContent = '[Nothing generated yet]';
         $('copyCompat').disabled = true;
         $('errors').scrollIntoView({behavior:'smooth', block:'center'});
@@ -520,7 +536,7 @@
       const compat = toCompat(data);
       $('compatOut').textContent = compat;
       $('copyCompat').disabled = false;
-      $('ok').style.display = '';         // success panel
+      $('ok').style.display = '';
       updateProgress();
     }
 
@@ -534,7 +550,6 @@
       setTimeout(()=>btn.textContent = original, 900);
     }
 
-    // Mark fields as "touched" and revalidate
     function touch(id){
       touched.add(id);
       validate(false);
