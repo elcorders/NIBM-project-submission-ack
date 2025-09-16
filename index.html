@@ -41,19 +41,34 @@
     .steps li { margin:6px 0; }
     hr { border:0; border-top:1px solid var(--line); margin:14px 0; }
     footer { text-align:center; color:var(--muted); font-size:13px; margin-top:16px; }
+
     /* Errors */
     .invalid { border-color:var(--err) !important; background:#fff7f7; }
     .hint { color:var(--err); font-size:13px; margin-top:6px; display:none; }
     .hint.show { display:block; }
     .error-panel {
       border:1px solid #fecaca; background:#fff1f2; color:#7f1d1d;
-      border-radius:10px; padding:12px 14px; margin:10px 0;
+      border-radius:10px; padding:12px 14px; margin:10px 0; display:none;
     }
     .error-panel ul { margin:8px 0 0 18px; }
     .ok-panel {
       border:1px solid #bbf7d0; background:#f0fdf4; color:#065f46;
       border-radius:10px; padding:10px 12px; margin:10px 0; display:none;
     }
+
+    /* Progress */
+    .progress-card .steps { display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 0; padding:0; list-style:none; }
+    .step {
+      display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line);
+      border-radius:999px; background:#fff;
+      font-size:14px; color:#374151;
+    }
+    .step .dot { width:10px; height:10px; border-radius:50%; background:#d1d5db; display:inline-block; }
+    .step.done .dot { background:var(--ok); }
+    .step.done { border-color:#bbf7d0; background:#f0fdf4; color:#065f46; }
+    .bar { height:10px; border-radius:999px; background:#e5e7eb; overflow:hidden; }
+    .fill { height:100%; width:0%; background:var(--accent); transition:width .25s ease; }
+    .pct { font-weight:700; color:#111827; }
   </style>
 </head>
 <body>
@@ -67,8 +82,26 @@
       Ensure all pasted links are publicly viewable (no login required).
     </div>
 
-    <!-- Error panel -->
-    <div id="errors" class="error-panel" style="display:none;">
+    <!-- Progress -->
+    <div class="card progress-card" aria-live="polite">
+      <div class="row" style="justify-content:space-between;align-items:center;">
+        <strong>Submission Progress:</strong>
+        <span class="pct" id="pctLabel">0%</span>
+      </div>
+      <div class="bar" style="margin:8px 0 10px;">
+        <div class="fill" id="progressFill"></div>
+      </div>
+      <ul class="steps">
+        <li class="step" id="step-details"><span class="dot"></span>Student Details</li>
+        <li class="step" id="step-deliverables"><span class="dot"></span>Deliverables</li>
+        <li class="step" id="step-links"><span class="dot"></span>Submission Links</li>
+        <li class="step" id="step-declaration"><span class="dot"></span>Declaration</li>
+        <li class="step" id="step-ready"><span class="dot"></span>Ready to Generate</li>
+      </ul>
+    </div>
+
+    <!-- Error / OK panels -->
+    <div id="errors" class="error-panel">
       <strong>Fix the following before you can generate:</strong>
       <ul id="errorList"></ul>
     </div>
@@ -121,7 +154,7 @@
         </div>
 
         <div>
-          <label>Git repo URL + final commit hash included in Final Report</label>
+          <label>Git repository URL with final commit hash included in the final report</label>
           <select id="git_commit_in_report"><option value="">Select…</option><option>Yes</option><option>No</option></select>
           <div id="hint_git_commit_in_report" class="hint">Select Yes only if your Final Report includes the Git repo URL and final commit hash.</div>
           <div class="muted">
@@ -130,7 +163,7 @@
               <li>Open your repository on GitHub &rarr; click <b>Commits</b>.</li>
               <li>Open your <b>final commit</b> (click its short hash).</li>
               <li>Copy the browser URL (must contain <code>/commit/&lt;sha&gt;</code>).</li>
-              <li>Paste that URL into the field below in Section 3 (Submission Links).</li>
+              <li>Paste that URL into Section 3 below (Submission Links).</li>
               <li>Add the same Git repo URL and <b>commit hash</b> to your <b>Final Report</b>.</li>
             </ul>
           </div>
@@ -144,7 +177,7 @@
             <strong>Required sections:</strong>
             <ul class="steps">
               <li><b>Overview</b> of the app and its functionality</li>
-              <li><b>Development process</b> &amp; <b>challenges</b> + <b>solutions</b></li>
+              <li><b>Development process</b> &amp; <b>challenges</b> + <b>solutions</li>
               <li><b>Advanced iOS feature</b> description (what, why, how)</li>
               <li><b>Reflection</b> on learning outcomes</li>
             </ul>
@@ -152,7 +185,7 @@
         </div>
 
         <div>
-          <label>App Demo Video (3–5 min), narrated</label>
+          <label>App Demonstration Video (3–5 min), narrated by me</label>
           <select id="demo_video"><option value="">Select…</option><option>Yes</option><option>No</option></select>
           <div id="hint_demo_video" class="hint">Select Yes only if your narrated demo video is ready and linked below.</div>
           <div class="muted">
@@ -254,6 +287,10 @@
   </div>
 
   <script>
+    // --- UX state ---
+    let submittedOnce = false;
+    const touched = new Set();
+
     // --- Validators ---
     const urlish = s => /^https?:\/\/[^\s]+$/i.test(s.trim());
     const isYouTube = s => /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(s.trim());
@@ -262,18 +299,18 @@
       const m = s.match(/\/commit\/([0-9a-f]{7,40})/i) || s.match(/[?&]h=([0-9a-f]{7,40})/i);
       return m ? m[1] : "";
     };
+
     const $ = id => document.getElementById(id);
     const val = id => $(id).value.trim();
 
     const requiredText = ['student_name','student_id','batch','project_title'];
     const yesNoIds = ['app_zip','git_commit_in_report','final_report_complete','demo_video'];
-    const linkIds = ['github_commit_url','youtube_unlisted','mvp_image'];
 
-    function setInvalid(id, msgId, show, msg){
+    function setInvalid(id, msgId, show, msg, silent){
       const el = $(id);
       const hint = $(msgId);
-      if(!el) return;
-      if(show){
+      const shouldShow = !silent && (submittedOnce || touched.has(id)) && show;
+      if(shouldShow){
         el.classList.add('invalid');
         if(hint){ hint.textContent = msg; hint.classList.add('show'); }
       } else {
@@ -282,16 +319,80 @@
       }
     }
 
-    function validate(){
+    function renderErrors(list, silent){
+      const panel = $('errors');
+      const ok = $('ok');
+      const ul = $('errorList');
+      if (silent) { panel.style.display = 'none'; ok.style.display = 'none'; return; }
+      ul.innerHTML = '';
+      if(list.length && submittedOnce){
+        panel.style.display = '';
+        ok.style.display = 'none';
+        list.forEach(e=>{
+          const li = document.createElement('li');
+          li.textContent = e;
+          ul.appendChild(li);
+        });
+      } else if(!list.length){
+        panel.style.display = 'none';
+        ok.style.display = '';
+      } else {
+        panel.style.display = 'none';
+        ok.style.display = 'none';
+      }
+    }
+
+    function checkDetails(){
+      return requiredText.every(id => !!val(id));
+    }
+    function checkDeliverables(){
+      return yesNoIds.every(id => /^(Yes|No)$/i.test(val(id)));
+    }
+    function checkLinks(){
+      const github = val('github_commit_url');
+      const yt = val('youtube_unlisted');
+      const img = val('mvp_image');
+      return urlish(github) && !!commitShaFromUrl(github) &&
+             urlish(yt) && isYouTube(yt) &&
+             urlish(img) && isImgDirect(img);
+    }
+    function checkDeclaration(){
+      return $('accept_decl').checked;
+    }
+
+    function updateProgress(){
+      const steps = [
+        { id:'step-details', done: checkDetails() },
+        { id:'step-deliverables', done: checkDeliverables() },
+        { id:'step-links', done: checkLinks() },
+        { id:'step-declaration', done: checkDeclaration() },
+      ];
+      const completed = steps.filter(s=>s.done).length;
+      const allValid = completed === steps.length;
+      // "Ready" step is true only when all are valid
+      const ready = allValid;
+      const totalSteps = steps.length + 1; // + 'ready'
+      const pct = Math.round(((completed + (ready?1:0)) / totalSteps) * 100);
+
+      steps.forEach(s=>{
+        const el = $(s.id);
+        el.classList.toggle('done', s.done);
+      });
+      $('step-ready').classList.toggle('done', ready);
+      $('progressFill').style.width = pct + '%';
+      $('pctLabel').textContent = pct + '%';
+    }
+
+    function validate(silent=false){
       const errors = [];
 
       // Required texts
       requiredText.forEach(id=>{
         if(!val(id)){
           errors.push(`Missing: ${id.replaceAll('_',' ')}`);
-          setInvalid(id, 'hint_'+id, true, 'This field is required.');
+          setInvalid(id, 'hint_'+id, true, 'This field is required.', silent);
         } else {
-          setInvalid(id, 'hint_'+id, false);
+          setInvalid(id, 'hint_'+id, false, '', silent);
         }
       });
 
@@ -300,9 +401,9 @@
         const v = val(id);
         if(!/^(Yes|No)$/i.test(v)){
           errors.push(`Select Yes/No for: ${id.replaceAll('_',' ')}`);
-          setInvalid(id, 'hint_'+id, true, 'Choose Yes or No.');
+          setInvalid(id, 'hint_'+id, true, 'Choose Yes or No.', silent);
         } else {
-          setInvalid(id, 'hint_'+id, false);
+          setInvalid(id, 'hint_'+id, false, '', silent);
         }
       });
 
@@ -310,61 +411,45 @@
       const github = val('github_commit_url');
       if(!urlish(github)){
         errors.push('Invalid GitHub commit URL');
-        setInvalid('github_commit_url','hint_github_commit_url',true,'Enter a valid GitHub commit URL.');
+        setInvalid('github_commit_url','hint_github_commit_url',true,'Enter a valid GitHub commit URL.', silent);
       } else if(!commitShaFromUrl(github)){
         errors.push('Could not extract commit SHA from GitHub URL');
-        setInvalid('github_commit_url','hint_github_commit_url',true,'URL must contain /commit/&lt;sha&gt;.');
+        setInvalid('github_commit_url','hint_github_commit_url',true,'URL must contain /commit/<sha>.', silent);
       } else {
-        setInvalid('github_commit_url','hint_github_commit_url',false);
+        setInvalid('github_commit_url','hint_github_commit_url',false,'', silent);
       }
 
       const yt = val('youtube_unlisted');
       if(!urlish(yt) || !isYouTube(yt)){
         errors.push('Invalid YouTube link (must be Unlisted)');
-        setInvalid('youtube_unlisted','hint_youtube_unlisted',true,'Provide a valid YouTube link (Unlisted).');
+        setInvalid('youtube_unlisted','hint_youtube_unlisted',true,'Provide a valid YouTube Unlisted link.', silent);
       } else {
-        setInvalid('youtube_unlisted','hint_youtube_unlisted',false);
+        setInvalid('youtube_unlisted','hint_youtube_unlisted',false,'', silent);
       }
 
       const img = val('mvp_image');
       if(!urlish(img) || !isImgDirect(img)){
         errors.push('Invalid MVP image direct link (.jpg/.png)');
-        setInvalid('mvp_image','hint_mvp_image',true,'Provide a direct .jpg/.png URL that opens without login.');
+        setInvalid('mvp_image','hint_mvp_image',true,'Provide a direct .jpg/.png URL that opens without login.', silent);
       } else {
-        setInvalid('mvp_image','hint_mvp_image',false);
+        setInvalid('mvp_image','hint_mvp_image',false,'', silent);
       }
 
       // Declaration
       const accepted = $('accept_decl').checked;
       if(!accepted){
         errors.push('You must accept the declaration');
-        setInvalid('accept_decl','hint_accept_decl',true,'Please tick to confirm.');
+        setInvalid('accept_decl','hint_accept_decl',true,'Please tick to confirm.', silent);
       } else {
-        setInvalid('accept_decl','hint_accept_decl',false);
+        setInvalid('accept_decl','hint_accept_decl',false,'', silent);
       }
 
-      renderErrors(errors);
+      // Button state + panels + progress
       $('generate').disabled = errors.length > 0;
-      return errors.length === 0;
-    }
+      renderErrors(errors, silent);
+      updateProgress();
 
-    function renderErrors(list){
-      const panel = $('errors');
-      const ok = $('ok');
-      const ul = $('errorList');
-      ul.innerHTML = '';
-      if(list.length){
-        panel.style.display = '';
-        ok.style.display = 'none';
-        list.forEach(e=>{
-          const li = document.createElement('li');
-          li.textContent = e;
-          ul.appendChild(li);
-        });
-      } else {
-        panel.style.display = 'none';
-        ok.style.display = '';
-      }
+      return errors.length === 0;
     }
 
     function toCompat(d){
@@ -424,42 +509,52 @@
     }
 
     function generate(){
-      // block if invalid
-      if(!validate()){
+      submittedOnce = true;               // show panels/hints on first attempt
+      if(!validate(false)){               // not valid -> block generation
         $('compatOut').textContent = '[Nothing generated yet]';
         $('copyCompat').disabled = true;
+        $('errors').scrollIntoView({behavior:'smooth', block:'center'});
         return;
       }
       const data = gather();
       const compat = toCompat(data);
       $('compatOut').textContent = compat;
       $('copyCompat').disabled = false;
+      $('ok').style.display = '';         // success panel
+      updateProgress();
     }
 
     async function copyCompat(){
       const text = $('compatOut').textContent;
       if(!text.startsWith('===SUBMISSION_START===')) return;
       await navigator.clipboard.writeText(text);
-      // micro feedback
       const btn = $('copyCompat');
       const original = btn.textContent;
       btn.textContent = 'Copied ✓';
       setTimeout(()=>btn.textContent = original, 900);
     }
 
-    // Live validation
-    [...requiredText, ...yesNoIds, ...linkIds, 'accept_decl'].forEach(id=>{
+    // Mark fields as "touched" and revalidate
+    function touch(id){
+      touched.add(id);
+      validate(false);
+    }
+
+    // Wire up events
+    [...requiredText, ...yesNoIds, 'github_commit_url','youtube_unlisted','mvp_image'].forEach(id=>{
       const el = $(id);
       if(!el) return;
-      const evt = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
-      el.addEventListener(evt, validate);
+      const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, ()=>touch(id));
+      el.addEventListener('blur', ()=>touch(id));
     });
+    $('accept_decl').addEventListener('change', ()=>touch('accept_decl'));
 
     $('generate').addEventListener('click', generate);
     $('copyCompat').addEventListener('click', copyCompat);
 
-    // Initial validate to set button state
-    validate();
+    // Initial silent validation for button state & progress (no errors shown)
+    validate(true);
   </script>
 </body>
 </html>
