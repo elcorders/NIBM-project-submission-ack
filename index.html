@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Final Project Submission – Generator</title>
+  <title>NIBM IOS Final Submission Acknowledgement Form</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     :root {
-      --bg:#f7f9fb; --card:#fff; --ink:#1f2937; --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb; --ok:#047857; --warn:#b45309; --err:#b91c1c;
-      --radius:14px;
+      --bg:#f7f9fb; --card:#fff; --ink:#111827; --muted:#6b7280; --accent:#2563eb; --line:#e5e7eb;
+      --ok:#047857; --warn:#b45309; --err:#b91c1c; --radius:14px;
     }
     html,body { background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, Segoe UI, Roboto, Arial, sans-serif; margin:0; }
-    .wrap { max-width:920px; margin:32px auto; padding:0 16px; }
+    .wrap { max-width:980px; margin:32px auto; padding:0 16px; }
     h1 { font-size:28px; margin:6px 0 12px; }
     .sub { color:var(--muted); margin:0 0 18px; }
     .card { background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:0 1px 2px rgba(0,0,0,.04); margin:14px 0; }
@@ -27,35 +27,30 @@
     .btn {
       appearance:none; border:1px solid var(--accent); background:var(--accent); color:#fff;
       padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer;
-      transition:filter .15s, transform .02s; 
+      transition:filter .15s, transform .02s;
     }
     .btn.secondary { background:#fff; color:var(--accent); }
     .btn:active { transform:translateY(1px); }
     .kvs { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; white-space:pre; background:#0b1020; color:#e8f0ff; padding:12px; border-radius:12px; overflow:auto; border:1px solid #1f2a44; }
-    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line); color:var(--muted); }
     .help { font-size:14px; color:var(--muted); }
-    .warn { color:var(--warn); }
-    .err { color:var(--err); }
+    .warning {
+      background:#fff1f2; border:1px solid #fecdd3; color:#7f1d1d;
+      padding:12px 14px; border-radius:10px; margin:14px 0; font-weight:700;
+    }
+    .steps li { margin:6px 0; }
     hr { border:0; border-top:1px solid var(--line); margin:14px 0; }
+    footer { text-align:center; color:var(--muted); font-size:13px; margin-top:16px; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Final Project Submission – Student Acknowledgement Form</h1>
-    <p class="sub">
-      Fill all fields, then click <strong>Generate Output</strong>. Paste the generated block into your LMS submission. 
-      Documentation may use AI and images may be sourced online with proper rights/credit.
-    </p>
+    <h1>NIBM IOS Final Submission Acknowledgement Form</h1>
+    <p class="sub">Fill all fields, then click <strong>Generate Output</strong>. Copy the generated block and paste it into the LMS assignment text box.</p>
 
-    <!-- Directions -->
-    <div class="card">
-      <strong>Before submitting, make sure to:</strong>
-      <ul class="help">
-        <li>Create the <strong>GitHub final commit link</strong>.</li>
-        <li>Upload the demo video as <strong>Unlisted</strong> on YouTube and copy the share link.</li>
-        <li>Crop and upload the <strong>MVP sheet</strong> to Imgur and copy the <strong>direct image link</strong> (.jpg/.png).</li>
-      </ul>
-      <div class="badge">Automation-ready</div>
+    <div class="warning">
+      ⚠️ IMPORTANT: THIS PAGE IS <u>NOT</u> A SUBMISSION PORTAL.  
+      You MUST copy the generated block into the LMS text box and submit there.  
+      Ensure all pasted links are publicly viewable (no login required).
     </div>
 
     <!-- Student Details -->
@@ -67,12 +62,13 @@
           <input id="student_name" type="text" placeholder="e.g., A. Perera" />
         </div>
         <div>
-          <label for="student_id">Student ID</label>
-          <input id="student_id" type="text" placeholder="e.g., 19XXXXXX" />
+          <label for="student_id">Index No</label>
+          <input id="student_id" type="text" placeholder="COBSCCOMP4Y241P-009" />
+          <div class="muted">Example shown for format only.</div>
         </div>
         <div>
-          <label for="batch">Batch / Module</label>
-          <input id="batch" type="text" placeholder="e.g., iOS-2025 Sep / Batch B" />
+          <label for="batch">Batch</label>
+          <input id="batch" type="text" placeholder="24.1" />
         </div>
         <div>
           <label for="project_title">App / Project Title</label>
@@ -122,26 +118,42 @@
     <!-- Links -->
     <div class="card">
       <h3>3) Submission Links</h3>
+
       <label>GitHub Final Commit URL</label>
       <input id="github_commit_url" type="text" placeholder="https://github.com/org/repo/commit/abcdef123456…" />
-      <div class="muted">How: Repo → Commits → click final commit hash → copy browser URL.</div>
-      <br>
+      <ol class="steps help">
+        <li>Open your GitHub repository &rarr; click <b>Commits</b>.</li>
+        <li>Open the <b>final commit</b> (click the short hash label).</li>
+        <li>Copy the browser URL (it must contain <code>/commit/&lt;sha&gt;</code>).</li>
+        <li>Paste that URL here.</li>
+      </ol>
+      <hr>
 
       <label>Unlisted YouTube Link (Demo)</label>
       <input id="youtube_unlisted" type="text" placeholder="https://youtu.be/..." />
-      <div class="muted">Set visibility to <strong>Unlisted</strong>, then copy the share link.</div>
-      <br>
+      <ol class="steps help">
+        <li>Upload your demo video to YouTube.</li>
+        <li>Under <b>Visibility</b>, choose <b>Unlisted</b> (not Private).</li>
+        <li>Save and copy the <b>Share</b> link; test in incognito to confirm public access via link.</li>
+        <li>Paste the link here.</li>
+      </ol>
+      <hr>
 
       <label>MVP Sheet – Direct Image Link (.jpg or .png)</label>
       <input id="mvp_image" type="text" placeholder="https://i.imgur.com/xyz123.png" />
-      <div class="muted">Crop to MVP content → upload to imgur.com/upload → copy <em>Direct</em> link (.jpg/.png).</div>
+      <ol class="steps help">
+        <li>Take a clear photo/screenshot of your MVP sheet and <b>crop</b> to show only the MVP content.</li>
+        <li>Go to <a href="https://imgur.com/upload" target="_blank" rel="noopener">imgur.com/upload</a> (no account required), upload the image.</li>
+        <li>Copy the <b>Direct Image Link</b> (URL ending with <code>.jpg</code> or <code>.png</code>). Avoid album/page links.</li>
+        <li>Test it in incognito; it must open without login. Paste here.</li>
+      </ol>
     </div>
 
     <!-- Declaration -->
     <div class="card">
       <h3>4) Declaration (Acknowledged by Submission)</h3>
       <p class="help">
-        By submitting the generated block, I confirm this is <strong>individual work</strong>; core code is my own; 
+        By generating and submitting the block below into the LMS, I confirm this is <b>individual work</b>; core code is my own; 
         documentation may use AI and images may be sourced online with proper rights/credit; 
         the final GitHub commit matches the ZIP and demo; the MVP image is accurate and cropped; 
         false/incomplete info may affect grading.
@@ -153,46 +165,64 @@
     </div>
 
     <!-- Actions -->
-    <div class="row">
+    <div class="row" style="margin-bottom:8px;">
       <button class="btn" id="generate">Generate Output</button>
-      <button class="btn secondary" id="copyCompat" disabled>Copy Compat Block</button>
-      <button class="btn secondary" id="copyJson" disabled>Copy JSON Block</button>
-      <span id="msg" class="muted"></span>
+      <span id="msg" class="help"></span>
     </div>
 
     <!-- Output -->
     <div class="card">
-      <h3>Compat Block (for LMS paste)</h3>
+      <h3>Submission Block (copy & paste into LMS)</h3>
       <div class="kvs" id="compatOut" aria-live="polite">[Nothing generated yet]</div>
-      <hr>
-      <h3>JSON Block (optional)</h3>
-      <div class="kvs" id="jsonOut">[Nothing generated yet]</div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn secondary" id="copyCompat" disabled>Copy Submission Block</button>
+      </div>
+      <p class="help">Block is wrapped by <code>===SUBMISSION_START===</code> / <code>===SUBMISSION_END===</code> for easy machine parsing.</p>
     </div>
 
-    <p class="help">Tip: The compat block is wrapped between <code>===SUBMISSION_START===</code> and <code>===SUBMISSION_END===</code> so you can machine-parse easily.</p>
+    <footer>© NM Fuzail 2025</footer>
   </div>
 
   <script>
-    // --- Simple validators ---
+    // --- Validators ---
     const urlish = s => /^https?:\/\/[^\s]+$/i.test(s.trim());
     const isYouTube = s => /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(s.trim());
     const isImgDirect = s => /^https?:\/\/[^\s]+?\.(png|jpg|jpeg)$/i.test(s.trim());
     const commitShaFromUrl = s => {
-      // supports .../commit/<sha> and ?h=<sha>
       const m = s.match(/\/commit\/([0-9a-f]{7,40})/i) || s.match(/[?&]h=([0-9a-f]{7,40})/i);
       return m ? m[1] : "";
     };
+    const val = id => document.getElementById(id).value.trim();
+    const setMsg = (txt, ok=false)=>{ const el=document.getElementById('msg'); el.textContent=txt; el.style.color= ok?'var(--ok)':'var(--warn)'; };
 
-    function val(id){ return document.getElementById(id).value.trim(); }
-    function setMsg(txt, ok=false){ 
-      const el = document.getElementById('msg'); 
-      el.textContent = txt; 
-      el.style.color = ok ? 'var(--ok)' : 'var(--warn)'; 
+    function toCompat(d){
+      const lines = [];
+      lines.push('===SUBMISSION_START===');
+      lines.push('form=NIBM-IOS-Final-Submission-Ack-v1');
+      lines.push(`student.name=${esc(d.student.name)}`);
+      lines.push(`student.index_no=${esc(d.student.id)}`);
+      lines.push(`student.batch=${esc(d.student.batch)}`);
+      lines.push(`student.project_title=${esc(d.student.project_title)}`);
+      lines.push(`deliverables.app_zip=${esc(d.deliverables.app_zip)}`);
+      lines.push(`deliverables.git_commit_in_report=${esc(d.deliverables.git_commit_in_report)}`);
+      lines.push(`deliverables.final_report_complete=${esc(d.deliverables.final_report_complete)}`);
+      lines.push(`deliverables.demo_video=${esc(d.deliverables.demo_video)}`);
+      lines.push(`stretch.docs=${esc(d.stretch.docs)}`);
+      lines.push(`stretch.future_plans=${esc(d.stretch.future_plans)}`);
+      lines.push(`links.github_commit_url=${esc(d.links.github_commit_url)}`);
+      lines.push(`links.commit_sha=${esc(d.links.commit_sha)}`);
+      lines.push(`links.youtube_unlisted=${esc(d.links.youtube_unlisted)}`);
+      lines.push(`links.mvp_image=${esc(d.links.mvp_image)}`);
+      lines.push(`meta.accepted_declaration=${d.meta.accepted_declaration}`);
+      lines.push(`meta.ts_iso=${d.meta.ts_iso}`);
+      lines.push(`meta.tz_offset_min=${d.meta.tz_offset_min}`);
+      lines.push('===SUBMISSION_END===');
+      return lines.join('\n');
     }
+    function esc(s){ return String(s ?? '').replace(/\n/g,' ').trim(); }
 
-    function generate() {
+    function generate(){
       const data = {
-        version: 1,
         student: {
           name: val('student_name'),
           id: val('student_id'),
@@ -219,78 +249,35 @@
           accepted_declaration: document.getElementById('accept_decl').checked,
           ts_iso: new Date().toISOString(),
           tz_offset_min: new Date().getTimezoneOffset() * -1,
-          user_agent: navigator.userAgent,
         }
       };
 
-      // --- Basic validation & hints ---
+      // Validation
       let issues = [];
-      // required text fields
-      ['student_name','student_id','batch','project_title'].forEach(id=>{
-        if(!val(id)) issues.push(`Missing: ${id.replace('_',' ')}`);
-      });
-      // deliverables yes/no
-      Object.entries(data.deliverables).forEach(([k,v])=>{
-        if(!/^(Yes|No)$/i.test(v)) issues.push(`Select Yes/No for: ${k}`);
-      });
-      // links
+      ['student_name','student_id','batch','project_title'].forEach(id=>{ if(!val(id)) issues.push(`Missing: ${id.replace('_',' ')}`); });
+      Object.entries(data.deliverables).forEach(([k,v])=>{ if(!/^(Yes|No)$/i.test(v)) issues.push(`Select Yes/No for: ${k}`); });
       if(!urlish(data.links.github_commit_url)) issues.push('Invalid GitHub commit URL');
       if(!data.links.commit_sha) issues.push('Could not extract commit SHA from GitHub URL');
       if(!urlish(data.links.youtube_unlisted) || !isYouTube(data.links.youtube_unlisted)) issues.push('Invalid YouTube link');
       if(!urlish(data.links.mvp_image) || !isImgDirect(data.links.mvp_image)) issues.push('Invalid MVP image direct link (.jpg/.png)');
       if(!data.meta.accepted_declaration) issues.push('You must accept the declaration');
 
+      // Output
       const compat = toCompat(data);
-      const json = JSON.stringify(data, null, 2);
-
       document.getElementById('compatOut').textContent = compat;
-      document.getElementById('jsonOut').textContent = json;
-
-      const copyBtns = ['copyCompat','copyJson'].map(id=>document.getElementById(id));
-      copyBtns.forEach(b=>b.disabled=false);
+      document.getElementById('copyCompat').disabled = false;
 
       setMsg(issues.length ? `Generated with ${issues.length} issue(s). Please fix: ${issues.join('; ')}` : 'Generated ✓ Ready to copy', issues.length===0);
     }
 
-    function toCompat(d){
-      // newline-delimited key=value, grouped, wrapped in markers
-      const lines = [];
-      lines.push('===SUBMISSION_START===');
-      lines.push('format=compat-v1');
-      lines.push(`student.name=${esc(d.student.name)}`);
-      lines.push(`student.id=${esc(d.student.id)}`);
-      lines.push(`student.batch=${esc(d.student.batch)}`);
-      lines.push(`student.project_title=${esc(d.student.project_title)}`);
-      lines.push(`deliverables.app_zip=${esc(d.deliverables.app_zip)}`);
-      lines.push(`deliverables.git_commit_in_report=${esc(d.deliverables.git_commit_in_report)}`);
-      lines.push(`deliverables.final_report_complete=${esc(d.deliverables.final_report_complete)}`);
-      lines.push(`deliverables.demo_video=${esc(d.deliverables.demo_video)}`);
-      lines.push(`stretch.docs=${esc(d.stretch.docs)}`);
-      lines.push(`stretch.future_plans=${esc(d.stretch.future_plans)}`);
-      lines.push(`links.github_commit_url=${esc(d.links.github_commit_url)}`);
-      lines.push(`links.commit_sha=${esc(d.links.commit_sha)}`);
-      lines.push(`links.youtube_unlisted=${esc(d.links.youtube_unlisted)}`);
-      lines.push(`links.mvp_image=${esc(d.links.mvp_image)}`);
-      lines.push(`meta.accepted_declaration=${d.meta.accepted_declaration}`);
-      lines.push(`meta.ts_iso=${d.meta.ts_iso}`);
-      lines.push(`meta.tz_offset_min=${d.meta.tz_offset_min}`);
-      lines.push(`meta.user_agent=${esc(d.meta.user_agent)}`);
-      lines.push('===SUBMISSION_END===');
-      return lines.join('\n');
-    }
-    function esc(s){ return String(s ?? '').replace(/\n/g,' ').trim(); }
-
-    // copy helpers
-    async function copyFrom(elId){
-      const text = document.getElementById(elId).textContent;
+    async function copyCompat(){
+      const text = document.getElementById('compatOut').textContent;
       await navigator.clipboard.writeText(text);
-      setMsg('Copied ✓', true);
+      setMsg('Submission block copied ✓', true);
     }
 
-    // wire up
     document.getElementById('generate').addEventListener('click', generate);
-    document.getElementById('copyCompat').addEventListener('click', ()=>copyFrom('compatOut'));
-    document.getElementById('copyJson').addEventListener('click', ()=>copyFrom('jsonOut'));
+    document.getElementById('copyCompat').addEventListener('click', copyCompat);
   </script>
 </body>
 </html>
