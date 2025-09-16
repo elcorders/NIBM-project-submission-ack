@@ -18,8 +18,8 @@
     @media (max-width:760px){ .grid{grid-template-columns:1fr;} }
     label { display:block; font-weight:600; margin:8px 0 6px; }
     input[type=text], select, textarea {
-      width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink);
-      outline:none; transition:border .15s, box-shadow .15s;
+      width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; color:#111827;
+      outline:none; transition:border .15s, box-shadow .15s, background .15s;
     }
     input[type=text]:focus, select:focus, textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.15); }
     .muted { color:var(--muted); font-size:13px; margin-top:4px; }
@@ -27,31 +27,52 @@
     .btn {
       appearance:none; border:1px solid var(--accent); background:var(--accent); color:#fff;
       padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer;
-      transition:filter .15s, transform .02s;
+      transition:filter .15s, transform .02s, opacity .15s;
     }
     .btn.secondary { background:#fff; color:var(--accent); }
     .btn:active { transform:translateY(1px); }
+    .btn[disabled] { opacity:.55; cursor:not-allowed; }
     .kvs { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; white-space:pre; background:#0b1020; color:#e8f0ff; padding:12px; border-radius:12px; overflow:auto; border:1px solid #1f2a44; }
     .help { font-size:14px; color:var(--muted); }
     .warning {
       background:#fff1f2; border:1px solid #fecdd3; color:#7f1d1d;
-      padding:12px 14px; border-radius:10px; margin:14px 0; font-weight:700;
+      padding:12px 14px; border-radius:10px; margin:14px 0; font-weight:800;
     }
     .steps li { margin:6px 0; }
     hr { border:0; border-top:1px solid var(--line); margin:14px 0; }
     footer { text-align:center; color:var(--muted); font-size:13px; margin-top:16px; }
+    /* Errors */
+    .invalid { border-color:var(--err) !important; background:#fff7f7; }
+    .hint { color:var(--err); font-size:13px; margin-top:6px; display:none; }
+    .hint.show { display:block; }
+    .error-panel {
+      border:1px solid #fecaca; background:#fff1f2; color:#7f1d1d;
+      border-radius:10px; padding:12px 14px; margin:10px 0;
+    }
+    .error-panel ul { margin:8px 0 0 18px; }
+    .ok-panel {
+      border:1px solid #bbf7d0; background:#f0fdf4; color:#065f46;
+      border-radius:10px; padding:10px 12px; margin:10px 0; display:none;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>NIBM IOS Final Submission Acknowledgement Form</h1>
-    <p class="sub">Fill all fields, then click <strong>Generate Output</strong>. Copy the generated block and paste it into the LMS assignment text box.</p>
+    <p class="sub">Fill all fields, then click <strong>Generate Submission Block</strong>. Copy the block into the LMS text box and submit there.</p>
 
     <div class="warning">
-      ⚠️ IMPORTANT: THIS PAGE IS <u>NOT</u> A SUBMISSION PORTAL.  
+      ⚠️ WARNING: THIS PAGE IS <u>NOT</u> A SUBMISSION PORTAL.  
       You MUST copy the generated block into the LMS text box and submit there.  
       Ensure all pasted links are publicly viewable (no login required).
     </div>
+
+    <!-- Error panel -->
+    <div id="errors" class="error-panel" style="display:none;">
+      <strong>Fix the following before you can generate:</strong>
+      <ul id="errorList"></ul>
+    </div>
+    <div id="ok" class="ok-panel">All checks passed. You can generate the submission block.</div>
 
     <!-- Student Details -->
     <div class="card">
@@ -60,19 +81,23 @@
         <div>
           <label for="student_name">Student Name</label>
           <input id="student_name" type="text" placeholder="e.g., A. Perera" />
+          <div id="hint_student_name" class="hint">Enter your full name.</div>
         </div>
         <div>
           <label for="student_id">Index No</label>
           <input id="student_id" type="text" placeholder="COBSCCOMP4Y241P-009" />
           <div class="muted">Example shown for format only.</div>
+          <div id="hint_student_id" class="hint">Enter your actual Index No (e.g., COBSCCOMP4Y241P-009).</div>
         </div>
         <div>
           <label for="batch">Batch</label>
           <input id="batch" type="text" placeholder="24.1" />
+          <div id="hint_batch" class="hint">Enter your batch (e.g., 24.1).</div>
         </div>
         <div>
           <label for="project_title">App / Project Title</label>
           <input id="project_title" type="text" placeholder="e.g., Campus Connect" />
+          <div id="hint_project_title" class="hint">Enter your project title.</div>
         </div>
       </div>
     </div>
@@ -84,18 +109,61 @@
         <div>
           <label>App Source Code (ZIP uploaded)</label>
           <select id="app_zip"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_app_zip" class="hint">Select Yes if you uploaded the ZIP file with your full source code.</div>
+          <div class="muted">
+            <strong>Instructions:</strong>
+            <ul class="steps">
+              <li>Export your full project as a <b>ZIP</b>, including all files needed to run.</li>
+              <li>Upload the ZIP to the LMS assignment file upload.</li>
+              <li>Return here and set this field to <b>Yes</b>.</li>
+            </ul>
+          </div>
         </div>
+
         <div>
-          <label>Git repo URL + final commit hash in Final Report</label>
+          <label>Git repo URL + final commit hash included in Final Report</label>
           <select id="git_commit_in_report"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_git_commit_in_report" class="hint">Select Yes only if your Final Report includes the Git repo URL and final commit hash.</div>
+          <div class="muted">
+            <strong>How to:</strong>
+            <ul class="steps">
+              <li>Open your repository on GitHub &rarr; click <b>Commits</b>.</li>
+              <li>Open your <b>final commit</b> (click its short hash).</li>
+              <li>Copy the browser URL (must contain <code>/commit/&lt;sha&gt;</code>).</li>
+              <li>Paste that URL into the field below in Section 3 (Submission Links).</li>
+              <li>Add the same Git repo URL and <b>commit hash</b> to your <b>Final Report</b>.</li>
+            </ul>
+          </div>
         </div>
+
         <div>
           <label>Final Report includes all sections</label>
           <select id="final_report_complete"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_final_report_complete" class="hint">Select Yes only if your report has all four sections.</div>
+          <div class="muted">
+            <strong>Required sections:</strong>
+            <ul class="steps">
+              <li><b>Overview</b> of the app and its functionality</li>
+              <li><b>Development process</b> &amp; <b>challenges</b> + <b>solutions</b></li>
+              <li><b>Advanced iOS feature</b> description (what, why, how)</li>
+              <li><b>Reflection</b> on learning outcomes</li>
+            </ul>
+          </div>
         </div>
+
         <div>
           <label>App Demo Video (3–5 min), narrated</label>
           <select id="demo_video"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_demo_video" class="hint">Select Yes only if your narrated demo video is ready and linked below.</div>
+          <div class="muted">
+            <strong>How to (YouTube Unlisted):</strong>
+            <ul class="steps">
+              <li>Record a <b>3–5 min</b> walkthrough covering key features.</li>
+              <li>Upload to YouTube &rarr; <b>Visibility</b> = <b>Unlisted</b> (not Private).</li>
+              <li>Copy the <b>Share</b> link and add in Section 3 below.</li>
+              <li>Test in a private/incognito window to ensure public access via link.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -107,10 +175,12 @@
         <div>
           <label>Comprehensive Code Documentation</label>
           <select id="stretch_docs"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_stretch_docs" class="hint">Select Yes only if you provided comprehensive docs beyond inline comments.</div>
         </div>
         <div>
           <label>Future Development Plans</label>
           <select id="stretch_future"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <div id="hint_stretch_future" class="hint">Select Yes if you included a future enhancements section.</div>
         </div>
       </div>
     </div>
@@ -121,31 +191,32 @@
 
       <label>GitHub Final Commit URL</label>
       <input id="github_commit_url" type="text" placeholder="https://github.com/org/repo/commit/abcdef123456…" />
-      <ol class="steps help">
-        <li>Open your GitHub repository &rarr; click <b>Commits</b>.</li>
-        <li>Open the <b>final commit</b> (click the short hash label).</li>
-        <li>Copy the browser URL (it must contain <code>/commit/&lt;sha&gt;</code>).</li>
-        <li>Paste that URL here.</li>
+      <div id="hint_github_commit_url" class="hint">Provide a valid URL to a specific commit (must contain /commit/&lt;sha&gt;).</div>
+      <ol class="steps help" style="margin-top:6px;">
+        <li>Go to your repo &rarr; <b>Commits</b> &rarr; open the <b>final commit</b>.</li>
+        <li>Copy the URL (e.g., <code>https://github.com/username/project/commit/abcd1234...</code>).</li>
+        <li>Paste here. The page should display a specific commit with its hash.</li>
       </ol>
       <hr>
 
       <label>Unlisted YouTube Link (Demo)</label>
       <input id="youtube_unlisted" type="text" placeholder="https://youtu.be/..." />
-      <ol class="steps help">
-        <li>Upload your demo video to YouTube.</li>
-        <li>Under <b>Visibility</b>, choose <b>Unlisted</b> (not Private).</li>
-        <li>Save and copy the <b>Share</b> link; test in incognito to confirm public access via link.</li>
-        <li>Paste the link here.</li>
+      <div id="hint_youtube_unlisted" class="hint">Provide a valid YouTube link (Unlisted). Test it in incognito.</div>
+      <ol class="steps help" style="margin-top:6px;">
+        <li>Upload your video &rarr; set <b>Visibility</b> to <b>Unlisted</b>.</li>
+        <li>Copy the <b>Share</b> link and paste here.</li>
+        <li>Open in incognito/private window to verify public access via link.</li>
       </ol>
       <hr>
 
       <label>MVP Sheet – Direct Image Link (.jpg or .png)</label>
       <input id="mvp_image" type="text" placeholder="https://i.imgur.com/xyz123.png" />
-      <ol class="steps help">
-        <li>Take a clear photo/screenshot of your MVP sheet and <b>crop</b> to show only the MVP content.</li>
-        <li>Go to <a href="https://imgur.com/upload" target="_blank" rel="noopener">imgur.com/upload</a> (no account required), upload the image.</li>
-        <li>Copy the <b>Direct Image Link</b> (URL ending with <code>.jpg</code> or <code>.png</code>). Avoid album/page links.</li>
-        <li>Test it in incognito; it must open without login. Paste here.</li>
+      <div id="hint_mvp_image" class="hint">Direct image URL required (.jpg/.png). Openable without login.</div>
+      <ol class="steps help" style="margin-top:6px;">
+        <li>Take a clear photo/screenshot and <b>crop</b> to <b>only</b> the MVP content.</li>
+        <li>Upload to <a href="https://imgur.com/upload" target="_blank" rel="noopener">imgur.com/upload</a> (no account required).</li>
+        <li>Copy the <b>Direct Image Link</b> (URL ending in <code>.jpg</code> or <code>.png</code>), not an album/page.</li>
+        <li>Test in incognito; must open without login. Paste here.</li>
       </ol>
     </div>
 
@@ -153,7 +224,7 @@
     <div class="card">
       <h3>4) Declaration (Acknowledged by Submission)</h3>
       <p class="help">
-        By generating and submitting the block below into the LMS, I confirm this is <b>individual work</b>; core code is my own; 
+        By generating and submitting the block into the LMS, I confirm this is <b>individual work</b>; core code is my own; 
         documentation may use AI and images may be sourced online with proper rights/credit; 
         the final GitHub commit matches the ZIP and demo; the MVP image is accurate and cropped; 
         false/incomplete info may affect grading.
@@ -162,11 +233,13 @@
         <input id="accept_decl" type="checkbox" />
         I understand and accept the declaration above.
       </label>
+      <div id="hint_accept_decl" class="hint">You must accept the declaration to proceed.</div>
     </div>
 
     <!-- Actions -->
     <div class="row" style="margin-bottom:8px;">
-      <button class="btn" id="generate">Generate Output</button>
+      <button class="btn" id="generate" disabled>Generate Submission Block</button>
+      <button class="btn secondary" id="copyCompat" disabled>Copy Submission Block</button>
       <span id="msg" class="help"></span>
     </div>
 
@@ -174,9 +247,6 @@
     <div class="card">
       <h3>Submission Block (copy & paste into LMS)</h3>
       <div class="kvs" id="compatOut" aria-live="polite">[Nothing generated yet]</div>
-      <div class="row" style="margin-top:10px;">
-        <button class="btn secondary" id="copyCompat" disabled>Copy Submission Block</button>
-      </div>
       <p class="help">Block is wrapped by <code>===SUBMISSION_START===</code> / <code>===SUBMISSION_END===</code> for easy machine parsing.</p>
     </div>
 
@@ -192,8 +262,110 @@
       const m = s.match(/\/commit\/([0-9a-f]{7,40})/i) || s.match(/[?&]h=([0-9a-f]{7,40})/i);
       return m ? m[1] : "";
     };
-    const val = id => document.getElementById(id).value.trim();
-    const setMsg = (txt, ok=false)=>{ const el=document.getElementById('msg'); el.textContent=txt; el.style.color= ok?'var(--ok)':'var(--warn)'; };
+    const $ = id => document.getElementById(id);
+    const val = id => $(id).value.trim();
+
+    const requiredText = ['student_name','student_id','batch','project_title'];
+    const yesNoIds = ['app_zip','git_commit_in_report','final_report_complete','demo_video'];
+    const linkIds = ['github_commit_url','youtube_unlisted','mvp_image'];
+
+    function setInvalid(id, msgId, show, msg){
+      const el = $(id);
+      const hint = $(msgId);
+      if(!el) return;
+      if(show){
+        el.classList.add('invalid');
+        if(hint){ hint.textContent = msg; hint.classList.add('show'); }
+      } else {
+        el.classList.remove('invalid');
+        if(hint){ hint.classList.remove('show'); }
+      }
+    }
+
+    function validate(){
+      const errors = [];
+
+      // Required texts
+      requiredText.forEach(id=>{
+        if(!val(id)){
+          errors.push(`Missing: ${id.replaceAll('_',' ')}`);
+          setInvalid(id, 'hint_'+id, true, 'This field is required.');
+        } else {
+          setInvalid(id, 'hint_'+id, false);
+        }
+      });
+
+      // Yes/No
+      yesNoIds.forEach(id=>{
+        const v = val(id);
+        if(!/^(Yes|No)$/i.test(v)){
+          errors.push(`Select Yes/No for: ${id.replaceAll('_',' ')}`);
+          setInvalid(id, 'hint_'+id, true, 'Choose Yes or No.');
+        } else {
+          setInvalid(id, 'hint_'+id, false);
+        }
+      });
+
+      // Links
+      const github = val('github_commit_url');
+      if(!urlish(github)){
+        errors.push('Invalid GitHub commit URL');
+        setInvalid('github_commit_url','hint_github_commit_url',true,'Enter a valid GitHub commit URL.');
+      } else if(!commitShaFromUrl(github)){
+        errors.push('Could not extract commit SHA from GitHub URL');
+        setInvalid('github_commit_url','hint_github_commit_url',true,'URL must contain /commit/&lt;sha&gt;.');
+      } else {
+        setInvalid('github_commit_url','hint_github_commit_url',false);
+      }
+
+      const yt = val('youtube_unlisted');
+      if(!urlish(yt) || !isYouTube(yt)){
+        errors.push('Invalid YouTube link (must be Unlisted)');
+        setInvalid('youtube_unlisted','hint_youtube_unlisted',true,'Provide a valid YouTube link (Unlisted).');
+      } else {
+        setInvalid('youtube_unlisted','hint_youtube_unlisted',false);
+      }
+
+      const img = val('mvp_image');
+      if(!urlish(img) || !isImgDirect(img)){
+        errors.push('Invalid MVP image direct link (.jpg/.png)');
+        setInvalid('mvp_image','hint_mvp_image',true,'Provide a direct .jpg/.png URL that opens without login.');
+      } else {
+        setInvalid('mvp_image','hint_mvp_image',false);
+      }
+
+      // Declaration
+      const accepted = $('accept_decl').checked;
+      if(!accepted){
+        errors.push('You must accept the declaration');
+        setInvalid('accept_decl','hint_accept_decl',true,'Please tick to confirm.');
+      } else {
+        setInvalid('accept_decl','hint_accept_decl',false);
+      }
+
+      renderErrors(errors);
+      $('generate').disabled = errors.length > 0;
+      return errors.length === 0;
+    }
+
+    function renderErrors(list){
+      const panel = $('errors');
+      const ok = $('ok');
+      const ul = $('errorList');
+      ul.innerHTML = '';
+      if(list.length){
+        panel.style.display = '';
+        ok.style.display = 'none';
+        list.forEach(e=>{
+          const li = document.createElement('li');
+          li.textContent = e;
+          ul.appendChild(li);
+        });
+      } else {
+        panel.style.display = 'none';
+        ok.style.display = '';
+      }
+    }
 
     function toCompat(d){
       const lines = [];
@@ -213,7 +385,6 @@
       lines.push(`links.commit_sha=${esc(d.links.commit_sha)}`);
       lines.push(`links.youtube_unlisted=${esc(d.links.youtube_unlisted)}`);
       lines.push(`links.mvp_image=${esc(d.links.mvp_image)}`);
-      lines.push(`meta.accepted_declaration=${d.meta.accepted_declaration}`);
       lines.push(`meta.ts_iso=${d.meta.ts_iso}`);
       lines.push(`meta.tz_offset_min=${d.meta.tz_offset_min}`);
       lines.push('===SUBMISSION_END===');
@@ -221,8 +392,8 @@
     }
     function esc(s){ return String(s ?? '').replace(/\n/g,' ').trim(); }
 
-    function generate(){
-      const data = {
+    function gather(){
+      return {
         student: {
           name: val('student_name'),
           id: val('student_id'),
@@ -246,38 +417,49 @@
           mvp_image: val('mvp_image'),
         },
         meta: {
-          accepted_declaration: document.getElementById('accept_decl').checked,
           ts_iso: new Date().toISOString(),
           tz_offset_min: new Date().getTimezoneOffset() * -1,
         }
       };
+    }
 
-      // Validation
-      let issues = [];
-      ['student_name','student_id','batch','project_title'].forEach(id=>{ if(!val(id)) issues.push(`Missing: ${id.replace('_',' ')}`); });
-      Object.entries(data.deliverables).forEach(([k,v])=>{ if(!/^(Yes|No)$/i.test(v)) issues.push(`Select Yes/No for: ${k}`); });
-      if(!urlish(data.links.github_commit_url)) issues.push('Invalid GitHub commit URL');
-      if(!data.links.commit_sha) issues.push('Could not extract commit SHA from GitHub URL');
-      if(!urlish(data.links.youtube_unlisted) || !isYouTube(data.links.youtube_unlisted)) issues.push('Invalid YouTube link');
-      if(!urlish(data.links.mvp_image) || !isImgDirect(data.links.mvp_image)) issues.push('Invalid MVP image direct link (.jpg/.png)');
-      if(!data.meta.accepted_declaration) issues.push('You must accept the declaration');
-
-      // Output
+    function generate(){
+      // block if invalid
+      if(!validate()){
+        $('compatOut').textContent = '[Nothing generated yet]';
+        $('copyCompat').disabled = true;
+        return;
+      }
+      const data = gather();
       const compat = toCompat(data);
-      document.getElementById('compatOut').textContent = compat;
-      document.getElementById('copyCompat').disabled = false;
-
-      setMsg(issues.length ? `Generated with ${issues.length} issue(s). Please fix: ${issues.join('; ')}` : 'Generated ✓ Ready to copy', issues.length===0);
+      $('compatOut').textContent = compat;
+      $('copyCompat').disabled = false;
     }
 
     async function copyCompat(){
-      const text = document.getElementById('compatOut').textContent;
+      const text = $('compatOut').textContent;
+      if(!text.startsWith('===SUBMISSION_START===')) return;
       await navigator.clipboard.writeText(text);
-      setMsg('Submission block copied ✓', true);
+      // micro feedback
+      const btn = $('copyCompat');
+      const original = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(()=>btn.textContent = original, 900);
     }
 
-    document.getElementById('generate').addEventListener('click', generate);
-    document.getElementById('copyCompat').addEventListener('click', copyCompat);
+    // Live validation
+    [...requiredText, ...yesNoIds, ...linkIds, 'accept_decl'].forEach(id=>{
+      const el = $(id);
+      if(!el) return;
+      const evt = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
+      el.addEventListener(evt, validate);
+    });
+
+    $('generate').addEventListener('click', generate);
+    $('copyCompat').addEventListener('click', copyCompat);
+
+    // Initial validate to set button state
+    validate();
   </script>
 </body>
 </html>
