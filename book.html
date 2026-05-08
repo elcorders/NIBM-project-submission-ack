@@ -1,221 +1,1107 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <title>Book Your Viva Slot — NIBM iOS</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg:#080b12; --surface:#0e1220; --surface2:#141929;
-      --border:#1e2740; --border2:#2a3555;
-      --ink:#dde3f0; --muted:#5a6480; --muted2:#8490b0;
-      --accent:#4f8ef7; --accent2:#7eb0ff;
-      --ok:#34d399; --ok-dim:rgba(52,211,153,.1);
-      --err:#f87171; --err-dim:rgba(248,113,113,.08);
-      --warn:#fbbf24; --warn-dim:rgba(251,191,36,.08);
-      --sat:#a78bfa; --sat-dim:rgba(167,139,250,.1);
-      --sun:#fb923c; --sun-dim:rgba(251,146,60,.1);
-      --r:14px;
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{background:var(--bg);color:var(--ink);font:15px/1.6 'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(79,142,247,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 30% at 80% 80%,rgba(167,139,250,.04) 0%,transparent 60%);pointer-events:none;z-index:0}
-    body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.025) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
-    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 16px 80px}
-    .header{text-align:center;margin-bottom:40px;animation:fadeUp .5s ease both}
-    .nibm-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.18);color:var(--accent2);font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border-radius:999px;margin-bottom:20px}
-    .nibm-badge::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 2s ease-in-out infinite}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-    h1{font:800 32px/1.1 'Syne',sans-serif;letter-spacing:-.03em;margin-bottom:10px}
-    .header-sub{color:var(--muted2);font-size:14px}
-    .steps-nav{display:flex;align-items:center;margin-bottom:36px;animation:fadeUp .5s .1s ease both}
-    .snav-item{display:flex;align-items:center;gap:8px;font:600 12px/1 'IBM Plex Mono',monospace;color:var(--muted);transition:color .2s}
-    .snav-item.active{color:var(--ink)}.snav-item.done{color:var(--ok)}
-    .snav-num{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;background:var(--surface);transition:all .2s}
-    .snav-item.active .snav-num{border-color:var(--accent);background:rgba(79,142,247,.12);color:var(--accent)}
-    .snav-item.done .snav-num{border-color:var(--ok);background:var(--ok-dim);color:var(--ok)}
-    .snav-line{width:32px;height:1px;background:var(--border);margin:0 4px}
-    @media(max-width:480px){.snav-label{display:none}.snav-line{width:20px}}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:520px;padding:28px;animation:fadeUp .4s .15s ease both}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    .card-title{font:700 17px/1 'Syne',sans-serif;letter-spacing:-.01em;margin-bottom:6px}
-    .card-sub{color:var(--muted2);font-size:13px;margin-bottom:24px}
-    label{display:block;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px}
-    .field{margin-bottom:20px}
-    input[type=text]{width:100%;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--ink);font:500 15px/1 'IBM Plex Mono',monospace;outline:none;transition:border .15s,box-shadow .15s;letter-spacing:.05em}
-    input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15)}
-    input[type=text].invalid{border-color:var(--err);background:var(--err-dim)}
-    input[type=text].valid{border-color:var(--ok)}
-    .hint{font-size:12px;margin-top:6px;color:var(--err);display:none}.hint.show{display:block}
-    .ok-hint{font-size:12px;margin-top:6px;color:var(--ok);display:none}.ok-hint.show{display:block}
-    .day-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-    .day-card{border:1.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;background:var(--surface2);text-align:center;user-select:none}
-    .day-card:hover{border-color:var(--border2)}
-    .day-card.selected-sat{border-color:var(--sat);background:var(--sat-dim)}
-    .day-card.selected-sun{border-color:var(--sun);background:var(--sun-dim)}
-    .day-icon{font-size:24px;margin-bottom:8px}
-    .day-name{font:700 14px/1 'Syne',sans-serif;margin-bottom:4px}
-    .day-date{font-size:12px;color:var(--muted2)}
-    .lab-check{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--warn-dim);border:1px solid rgba(251,191,36,.2);border-radius:10px;margin-bottom:20px;cursor:pointer}
-    .lab-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--warn);cursor:pointer;flex-shrink:0;margin-top:2px}
-    .lab-check-text{font-size:13px;color:var(--ink)}
-    .lab-check-text small{display:block;color:var(--muted2);font-size:12px;margin-top:3px}
-    .slots-title{font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px}
-    .slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
-    .slot-btn{border:1.5px solid var(--border);border-radius:10px;padding:12px;background:var(--surface2);cursor:pointer;transition:all .18s;text-align:left}
-    .slot-btn:hover:not(.blocked):not(.full){border-color:var(--border2);background:#1a2035}
-    .slot-btn.selected{border-color:var(--accent);background:rgba(79,142,247,.1)}
-    .slot-btn.blocked,.slot-btn.full{opacity:.35;cursor:not-allowed}
-    .slot-time{font:600 14px/1 'IBM Plex Mono',monospace;color:var(--ink);margin-bottom:5px}
-    .slot-meta{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px}
-    .slot-pip{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0}
-    .slot-pip.warn{background:var(--warn)}.slot-pip.err{background:var(--err)}
-    .divider{border:0;border-top:1px solid var(--border);margin:20px 0}
-    .btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;color:#fff;font:700 15px/1 'Syne',sans-serif;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
-    .btn-primary:hover:not([disabled]){filter:brightness(1.1);box-shadow:0 0 24px rgba(79,142,247,.3)}
-    .btn-primary[disabled]{opacity:.35;cursor:not-allowed}
-    .btn-primary:active:not([disabled]){transform:translateY(1px)}
-    .btn-ghost{width:100%;padding:12px;background:transparent;border:1.5px solid var(--border);border-radius:12px;color:var(--muted2);font:600 14px/1 'DM Sans',sans-serif;cursor:pointer;margin-top:10px;transition:all .15s}
-    .btn-ghost:hover{border-color:var(--border2);color:var(--ink)}
-    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .success-screen{width:100%;max-width:520px;display:none;animation:fadeUp .4s ease both}
-    .success-screen.show{display:block}
-    .success-card{background:var(--surface);border:1px solid rgba(52,211,153,.25);border-radius:var(--r);padding:36px 28px;text-align:center}
-    .success-icon{width:64px;height:64px;background:var(--ok-dim);border:2px solid rgba(52,211,153,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
-    @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-    .success-title{font:800 22px/1.2 'Syne',sans-serif;letter-spacing:-.02em;margin-bottom:8px}
-    .success-sub{color:var(--muted2);font-size:14px;margin-bottom:24px}
-    .success-detail{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:left;margin-bottom:16px}
-    .success-detail-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
-    .success-detail-row:last-child{border-bottom:none}
-    .success-detail-row .lbl{color:var(--muted2)}
-    .success-detail-row .val{font:600 13px/1 'IBM Plex Mono',monospace;color:var(--ink)}
-    .success-note{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.15);border-radius:10px;padding:14px;font-size:13px;color:var(--muted2);text-align:left;line-height:1.6}
-    .success-note strong{color:var(--accent2)}
-    .msg-box{padding:12px 14px;border-radius:10px;font-size:13px;margin-top:12px;display:none}
-    .msg-box.show{display:block}
-    .msg-box.err{background:var(--err-dim);border:1px solid rgba(248,113,113,.2);color:#fca5a5}
-    .msg-box.ok{background:var(--ok-dim);border:1px solid rgba(52,211,153,.2);color:var(--ok)}
-    .booked-banner{background:var(--ok-dim);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--ok);margin-bottom:16px;display:none}
-    footer{margin-top:48px;font:400 12px/1 'IBM Plex Mono',monospace;color:var(--muted);text-align:center;animation:fadeUp .4s .3s ease both}
-  </style>
-</head>
-<body>
-<div class="page">
-  <div class="header">
-    <div class="nibm-badge">NIBM · iOS Viva · 2025</div>
-    <h1>Book Your Slot</h1>
-    <p class="header-sub">Enter your token, pick your day and hour window.</p>
-  </div>
-  <div class="steps-nav" id="stepsNav">
-    <div class="snav-item active" id="snav1"><div class="snav-num">1</div><span class="snav-label">Token</span></div>
-    <div class="snav-line"></div>
-    <div class="snav-item" id="snav2"><div class="snav-num">2</div><span class="snav-label">Day</span></div>
-    <div class="snav-line"></div>
-    <div class="snav-item" id="snav3"><div class="snav-num">3</div><span class="snav-label">Slot</span></div>
-    <div class="snav-line"></div>
-    <div class="snav-item" id="snav4"><div class="snav-num">4</div><span class="snav-label">Confirm</span></div>
-  </div>
-  <div class="card" id="step1Card">
-    <div class="card-title">Enter your submission token</div>
-    <div class="card-sub">From your iOS Final Submission acknowledgement form.</div>
-    <div class="booked-banner" id="bookedBanner"></div>
-    <div class="field">
-      <label for="tokenInput">Submission Token</label>
-      <input id="tokenInput" type="text" placeholder="IOS-XXXX" autocomplete="off" spellcheck="false"/>
-      <div id="tokenHint" class="hint"></div>
-      <div id="tokenOk" class="ok-hint"></div>
-    </div>
-    <button class="btn-primary" id="tokenBtn" disabled>
-      <span id="tokenBtnTxt">Verify Token</span>
-      <div class="spinner" id="tokenSpinner"></div>
-    </button>
-    <div class="msg-box" id="tokenMsg"></div>
-  </div>
-  <div class="card" id="step2Card" style="display:none">
-    <div class="card-title">Select your day</div>
-    <div class="card-sub">Choose which day your viva is scheduled.</div>
-    <div class="day-grid">
-      <div class="day-card" id="daySat" onclick="selectDay('sat')">
-        <div class="day-icon">🗓</div>
-        <div class="day-name">Saturday</div>
-        <div class="day-date" id="satDate">—</div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Book Your Viva Slot — NIBM iOS</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #080b12;
+        --surface: #0e1220;
+        --surface2: #141929;
+        --border: #1e2740;
+        --border2: #2a3555;
+        --ink: #dde3f0;
+        --muted: #5a6480;
+        --muted2: #8490b0;
+        --accent: #4f8ef7;
+        --accent2: #7eb0ff;
+        --ok: #34d399;
+        --ok-dim: rgba(52, 211, 153, 0.1);
+        --err: #f87171;
+        --err-dim: rgba(248, 113, 113, 0.08);
+        --warn: #fbbf24;
+        --warn-dim: rgba(251, 191, 36, 0.08);
+        --sat: #a78bfa;
+        --sat-dim: rgba(167, 139, 250, 0.1);
+        --sun: #fb923c;
+        --sun-dim: rgba(251, 146, 60, 0.1);
+        --r: 14px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.6 "DM Sans",
+          sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 20% 10%,
+            rgba(79, 142, 247, 0.06) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 30% at 80% 80%,
+            rgba(167, 139, 250, 0.04) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(79, 142, 247, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(79, 142, 247, 0.025) 1px, transparent 1px);
+        background-size: 32px 32px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .page {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 48px 16px 80px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        animation: fadeUp 0.5s ease both;
+      }
+      .nibm-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(79, 142, 247, 0.08);
+        border: 1px solid rgba(79, 142, 247, 0.18);
+        color: var(--accent2);
+        font:
+          600 11px/1 "IBM Plex Mono",
+          monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 7px 14px;
+        border-radius: 999px;
+        margin-bottom: 20px;
+      }
+      .nibm-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: blink 2s ease-in-out infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.2;
+        }
+      }
+      h1 {
+        font:
+          800 32px/1.1 "Syne",
+          sans-serif;
+        letter-spacing: -0.03em;
+        margin-bottom: 10px;
+      }
+      .header-sub {
+        color: var(--muted2);
+        font-size: 14px;
+      }
+      .steps-nav {
+        display: flex;
+        align-items: center;
+        margin-bottom: 36px;
+        animation: fadeUp 0.5s 0.1s ease both;
+      }
+      .snav-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font:
+          600 12px/1 "IBM Plex Mono",
+          monospace;
+        color: var(--muted);
+        transition: color 0.2s;
+      }
+      .snav-item.active {
+        color: var(--ink);
+      }
+      .snav-item.done {
+        color: var(--ok);
+      }
+      .snav-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        background: var(--surface);
+        transition: all 0.2s;
+      }
+      .snav-item.active .snav-num {
+        border-color: var(--accent);
+        background: rgba(79, 142, 247, 0.12);
+        color: var(--accent);
+      }
+      .snav-item.done .snav-num {
+        border-color: var(--ok);
+        background: var(--ok-dim);
+        color: var(--ok);
+      }
+      .snav-line {
+        width: 32px;
+        height: 1px;
+        background: var(--border);
+        margin: 0 4px;
+      }
+      @media (max-width: 480px) {
+        .snav-label {
+          display: none;
+        }
+        .snav-line {
+          width: 20px;
+        }
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        width: 100%;
+        max-width: 520px;
+        padding: 28px;
+        animation: fadeUp 0.4s 0.15s ease both;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card-title {
+        font:
+          700 17px/1 "Syne",
+          sans-serif;
+        letter-spacing: -0.01em;
+        margin-bottom: 6px;
+      }
+      .card-sub {
+        color: var(--muted2);
+        font-size: 13px;
+        margin-bottom: 24px;
+      }
+      label {
+        display: block;
+        font:
+          600 11px/1 "IBM Plex Mono",
+          monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted2);
+        margin-bottom: 8px;
+      }
+      .field {
+        margin-bottom: 20px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--ink);
+        font:
+          500 15px/1 "IBM Plex Mono",
+          monospace;
+        outline: none;
+        transition:
+          border 0.15s,
+          box-shadow 0.15s;
+        letter-spacing: 0.05em;
+      }
+      input[type="text"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+      }
+      input[type="text"].invalid {
+        border-color: var(--err);
+        background: var(--err-dim);
+      }
+      input[type="text"].valid {
+        border-color: var(--ok);
+      }
+      .hint {
+        font-size: 12px;
+        margin-top: 6px;
+        color: var(--err);
+        display: none;
+      }
+      .hint.show {
+        display: block;
+      }
+      .ok-hint {
+        font-size: 12px;
+        margin-top: 6px;
+        color: var(--ok);
+        display: none;
+      }
+      .ok-hint.show {
+        display: block;
+      }
+      .day-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .day-card {
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--surface2);
+        text-align: center;
+        user-select: none;
+      }
+      .day-card:hover {
+        border-color: var(--border2);
+      }
+      .day-card.selected-sat {
+        border-color: var(--sat);
+        background: var(--sat-dim);
+      }
+      .day-card.selected-sun {
+        border-color: var(--sun);
+        background: var(--sun-dim);
+      }
+      .day-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      .day-name {
+        font:
+          700 14px/1 "Syne",
+          sans-serif;
+        margin-bottom: 4px;
+      }
+      .day-date {
+        font-size: 12px;
+        color: var(--muted2);
+      }
+      .lab-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px;
+        background: var(--warn-dim);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        border-radius: 10px;
+        margin-bottom: 20px;
+        cursor: pointer;
+      }
+      .lab-check input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--warn);
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .lab-check-text {
+        font-size: 13px;
+        color: var(--ink);
+      }
+      .lab-check-text small {
+        display: block;
+        color: var(--muted2);
+        font-size: 12px;
+        margin-top: 3px;
+      }
+      .slots-title {
+        font:
+          600 11px/1 "IBM Plex Mono",
+          monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted2);
+        margin-bottom: 12px;
+      }
+      .slots-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .slot-btn {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        background: var(--surface2);
+        cursor: pointer;
+        transition: all 0.18s;
+        text-align: left;
+      }
+      .slot-btn:hover:not(.blocked):not(.full) {
+        border-color: var(--border2);
+        background: #1a2035;
+      }
+      .slot-btn.selected {
+        border-color: var(--accent);
+        background: rgba(79, 142, 247, 0.1);
+      }
+      .slot-btn.blocked,
+      .slot-btn.full {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .slot-time {
+        font:
+          600 14px/1 "IBM Plex Mono",
+          monospace;
+        color: var(--ink);
+        margin-bottom: 5px;
+      }
+      .slot-meta {
+        font-size: 11px;
+        color: var(--muted2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .slot-pip {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ok);
+        flex-shrink: 0;
+      }
+      .slot-pip.warn {
+        background: var(--warn);
+      }
+      .slot-pip.err {
+        background: var(--err);
+      }
+      .divider {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+      .btn-primary {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        font:
+          700 15px/1 "Syne",
+          sans-serif;
+        cursor: pointer;
+        transition: all 0.18s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-primary:hover:not([disabled]) {
+        filter: brightness(1.1);
+        box-shadow: 0 0 24px rgba(79, 142, 247, 0.3);
+      }
+      .btn-primary[disabled] {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .btn-primary:active:not([disabled]) {
+        transform: translateY(1px);
+      }
+      .btn-ghost {
+        width: 100%;
+        padding: 12px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        color: var(--muted2);
+        font:
+          600 14px/1 "DM Sans",
+          sans-serif;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.15s;
+      }
+      .btn-ghost:hover {
+        border-color: var(--border2);
+        color: var(--ink);
+      }
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: none;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .success-screen {
+        width: 100%;
+        max-width: 520px;
+        display: none;
+        animation: fadeUp 0.4s ease both;
+      }
+      .success-screen.show {
+        display: block;
+      }
+      .success-card {
+        background: var(--surface);
+        border: 1px solid rgba(52, 211, 153, 0.25);
+        border-radius: var(--r);
+        padding: 36px 28px;
+        text-align: center;
+      }
+      .success-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--ok-dim);
+        border: 2px solid rgba(52, 211, 153, 0.35);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 20px;
+        animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .success-title {
+        font:
+          800 22px/1.2 "Syne",
+          sans-serif;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+      }
+      .success-sub {
+        color: var(--muted2);
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      .success-detail {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        text-align: left;
+        margin-bottom: 16px;
+      }
+      .success-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .success-detail-row:last-child {
+        border-bottom: none;
+      }
+      .success-detail-row .lbl {
+        color: var(--muted2);
+      }
+      .success-detail-row .val {
+        font:
+          600 13px/1 "IBM Plex Mono",
+          monospace;
+        color: var(--ink);
+      }
+      .success-note {
+        background: rgba(79, 142, 247, 0.07);
+        border: 1px solid rgba(79, 142, 247, 0.15);
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 13px;
+        color: var(--muted2);
+        text-align: left;
+        line-height: 1.6;
+      }
+      .success-note strong {
+        color: var(--accent2);
+      }
+      .msg-box {
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-top: 12px;
+        display: none;
+      }
+      .msg-box.show {
+        display: block;
+      }
+      .msg-box.err {
+        background: var(--err-dim);
+        border: 1px solid rgba(248, 113, 113, 0.2);
+        color: #fca5a5;
+      }
+      .msg-box.ok {
+        background: var(--ok-dim);
+        border: 1px solid rgba(52, 211, 153, 0.2);
+        color: var(--ok);
+      }
+      .booked-banner {
+        background: var(--ok-dim);
+        border: 1px solid rgba(52, 211, 153, 0.2);
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 13px;
+        color: var(--ok);
+        margin-bottom: 16px;
+        display: none;
+      }
+      footer {
+        margin-top: 48px;
+        font:
+          400 12px/1 "IBM Plex Mono",
+          monospace;
+        color: var(--muted);
+        text-align: center;
+        animation: fadeUp 0.4s 0.3s ease both;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div class="nibm-badge">NIBM · iOS Viva · 2025</div>
+        <h1>Book Your Slot</h1>
+        <p class="header-sub">
+          Enter your token, pick your day and hour window.
+        </p>
       </div>
-      <div class="day-card" id="daySun" onclick="selectDay('sun')">
-        <div class="day-icon">☀️</div>
-        <div class="day-name">Sunday</div>
-        <div class="day-date" id="sunDate">—</div>
+      <div class="steps-nav" id="stepsNav">
+        <div class="snav-item active" id="snav1">
+          <div class="snav-num">1</div>
+          <span class="snav-label">Token</span>
+        </div>
+        <div class="snav-line"></div>
+        <div class="snav-item" id="snav2">
+          <div class="snav-num">2</div>
+          <span class="snav-label">Day</span>
+        </div>
+        <div class="snav-line"></div>
+        <div class="snav-item" id="snav3">
+          <div class="snav-num">3</div>
+          <span class="snav-label">Slot</span>
+        </div>
+        <div class="snav-line"></div>
+        <div class="snav-item" id="snav4">
+          <div class="snav-num">4</div>
+          <span class="snav-label">Confirm</span>
+        </div>
       </div>
-    </div>
-    <label class="lab-check" id="labLabel" style="display:none">
-      <input type="checkbox" id="labCheck" onchange="onLabChange()"/>
-      <div class="lab-check-text">
-        I am using a lab computer
-        <small>Evening slots (7pm–11pm) will not be available on lab computers.</small>
+      <div class="card" id="step1Card">
+        <div class="card-title">Enter your submission token</div>
+        <div class="card-sub">
+          From your iOS Final Submission acknowledgement form.
+        </div>
+        <div class="booked-banner" id="bookedBanner"></div>
+        <div class="field">
+          <label for="tokenInput">Submission Token</label>
+          <input
+            id="tokenInput"
+            type="text"
+            placeholder="IOS-XXXX"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div id="tokenHint" class="hint"></div>
+          <div id="tokenOk" class="ok-hint"></div>
+        </div>
+        <button class="btn-primary" id="tokenBtn" disabled>
+          <span id="tokenBtnTxt">Verify Token</span>
+          <div class="spinner" id="tokenSpinner"></div>
+        </button>
+        <div class="msg-box" id="tokenMsg"></div>
       </div>
-    </label>
-    <button class="btn-primary" id="dayBtn" disabled onclick="goToStep3()">Continue to Slot Selection</button>
-    <button class="btn-ghost" onclick="goToStep(1)">← Back</button>
-  </div>
-  <div class="card" id="step3Card" style="display:none">
-    <div class="card-title">Pick your hour window</div>
-    <div class="card-sub">Max 5 students per hour · ~10 min per session</div>
-    <div class="slots-title">Available slots</div>
-    <div class="slots-grid" id="slotsGrid"></div>
-    <button class="btn-primary" id="slotBtn" disabled onclick="goToStep4()">Review Booking</button>
-    <button class="btn-ghost" onclick="goToStep(2)">← Back</button>
-  </div>
-  <div class="card" id="step4Card" style="display:none">
-    <div class="card-title">Confirm your booking</div>
-    <div class="card-sub">Review the details below before confirming.</div>
-    <div class="success-detail" id="confirmDetail"></div>
-    <div class="msg-box" id="confirmMsg"></div>
-    <button class="btn-primary" id="confirmBtn" onclick="submitBooking()" style="margin-top:16px">
-      <span id="confirmBtnTxt">Confirm Booking</span>
-      <div class="spinner" id="confirmSpinner"></div>
-    </button>
-    <button class="btn-ghost" onclick="goToStep(3)">← Back</button>
-  </div>
-  <div class="success-screen" id="successScreen">
-    <div class="success-card">
-      <div class="success-icon">✓</div>
-      <div class="success-title">Slot booked!</div>
-      <div class="success-sub">Come back during your window to join the queue.</div>
-      <div class="success-detail" id="successDetail"></div>
-      <div class="success-note" id="successNote"></div>
+      <div class="card" id="step2Card" style="display: none">
+        <div class="card-title">Select your day</div>
+        <div class="card-sub">Choose which day your viva is scheduled.</div>
+        <div class="day-grid">
+          <div class="day-card" id="daySat" onclick="selectDay('sat')">
+            <div class="day-icon">🗓</div>
+            <div class="day-name">Saturday</div>
+            <div class="day-date" id="satDate">—</div>
+          </div>
+          <div class="day-card" id="daySun" onclick="selectDay('sun')">
+            <div class="day-icon">☀️</div>
+            <div class="day-name">Sunday</div>
+            <div class="day-date" id="sunDate">—</div>
+          </div>
+        </div>
+        <label class="lab-check" id="labLabel" style="display: none">
+          <input type="checkbox" id="labCheck" onchange="onLabChange()" />
+          <div class="lab-check-text">
+            I am using a lab computer
+            <small
+              >Evening slots (7pm–11pm) will not be available on lab
+              computers.</small
+            >
+          </div>
+        </label>
+        <button class="btn-primary" id="dayBtn" disabled onclick="goToStep3()">
+          Continue to Slot Selection
+        </button>
+        <button class="btn-ghost" onclick="goToStep(1)">← Back</button>
+      </div>
+      <div class="card" id="step3Card" style="display: none">
+        <div class="card-title">Pick your hour window</div>
+        <div class="card-sub">
+          Max 5 students per hour · ~10 min per session
+        </div>
+        <div class="slots-title">Available slots</div>
+        <div class="slots-grid" id="slotsGrid"></div>
+        <button class="btn-primary" id="slotBtn" disabled onclick="goToStep4()">
+          Review Booking
+        </button>
+        <button class="btn-ghost" onclick="goToStep(2)">← Back</button>
+      </div>
+      <div class="card" id="step4Card" style="display: none">
+        <div class="card-title">Confirm your booking</div>
+        <div class="card-sub">Review the details below before confirming.</div>
+        <div class="success-detail" id="confirmDetail"></div>
+        <div class="msg-box" id="confirmMsg"></div>
+        <button
+          class="btn-primary"
+          id="confirmBtn"
+          onclick="submitBooking()"
+          style="margin-top: 16px"
+        >
+          <span id="confirmBtnTxt">Confirm Booking</span>
+          <div class="spinner" id="confirmSpinner"></div>
+        </button>
+        <button class="btn-ghost" onclick="goToStep(3)">← Back</button>
+      </div>
+      <div class="success-screen" id="successScreen">
+        <div class="success-card">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Slot booked!</div>
+          <div class="success-sub">
+            Come back during your window to join the queue.
+          </div>
+          <div class="success-detail" id="successDetail"></div>
+          <div class="success-note" id="successNote"></div>
+        </div>
+      </div>
+      <footer>© NM Fuzail 2025 · NIBM iOS Module</footer>
     </div>
-  </div>
-  <footer>© NM Fuzail 2025 · NIBM iOS Module</footer>
-</div>
-<script>
-const SUPABASE_URL  = 'https://shfvfibjwqkjqfsmbbax.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU';
-const QUEUE_PAGE    = './queue.html';
-const SAT_DATE = 'Sat 10 May 2025';
-const SUN_DATE = 'Sun 11 May 2025';
+    <script>
+      const SUPABASE_URL = "https://shfvfibjwqkjqfsmbbax.supabase.co";
+      const SUPABASE_ANON = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
+      const QUEUE_PAGE = "./queue.html";
+      const SAT_DATE = "Sat 10 May 2025";
+      const SUN_DATE = "Sun 11 May 2025";
 
-const db = (path,opts={}) => fetch(SUPABASE_URL+'/rest/v1/'+path,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=representation',...opts.headers},...opts}).then(r=>r.json());
-let state={step:1,token:'',studentName:'',studentIndex:'',day:null,isLab:false,sessions:[],selectedHour:null};
-document.getElementById('satDate').textContent=SAT_DATE;
-document.getElementById('sunDate').textContent=SUN_DATE;
-const tokenInput=document.getElementById('tokenInput');
-tokenInput.addEventListener('input',()=>{const v=tokenInput.value.trim().toUpperCase();tokenInput.value=v;document.getElementById('tokenBtn').disabled=v.length<4;document.getElementById('tokenHint').classList.remove('show');document.getElementById('tokenOk').classList.remove('show');tokenInput.classList.remove('invalid','valid');});
-tokenInput.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('tokenBtn').click();});
-function goToStep(n){state.step=n;['step1Card','step2Card','step3Card','step4Card'].forEach((id,i)=>{document.getElementById(id).style.display=(i+1===n)?'':'none';});document.getElementById('successScreen').classList.remove('show');updateStepsNav(n);window.scrollTo({top:0,behavior:'smooth'});}
-function updateStepsNav(n){[1,2,3,4].forEach(i=>{const el=document.getElementById('snav'+i);el.classList.remove('active','done');if(i<n)el.classList.add('done');else if(i===n)el.classList.add('active');});}
-async function verifyToken(){const token=tokenInput.value.trim().toUpperCase();const btn=document.getElementById('tokenBtn');const spinner=document.getElementById('tokenSpinner');const txt=document.getElementById('tokenBtnTxt');const hint=document.getElementById('tokenHint');const okHint=document.getElementById('tokenOk');const msgBox=document.getElementById('tokenMsg');btn.disabled=true;spinner.style.display='';txt.textContent='Verifying…';hint.classList.remove('show');okHint.classList.remove('show');msgBox.className='msg-box';msgBox.style.display='none';try{const sub=await db('ios_submissions?submission_code=eq.'+encodeURIComponent(token)+'&select=submission_code,student_name,student_index');if(!Array.isArray(sub)||sub.length===0){tokenInput.classList.add('invalid');hint.textContent='Token not found. Check your submission acknowledgement.';hint.classList.add('show');btn.disabled=false;spinner.style.display='none';txt.textContent='Verify Token';return;}state.token=token;state.studentName=sub[0].student_name||'';state.studentIndex=sub[0].student_index||'';const existing=await db('bookings?token=eq.'+encodeURIComponent(token)+'&select=day,hour_start');if(Array.isArray(existing)&&existing.length>0){const b=existing[0];const banner=document.getElementById('bookedBanner');banner.innerHTML='✓ Already booked: <strong>'+b.day.toUpperCase()+'</strong> · '+fmt(b.hour_start)+'–'+fmt(b.hour_start+1)+'. <a href="'+QUEUE_PAGE+'" style="color:var(--ok);text-decoration:underline">Go to queue →</a>';banner.style.display='';tokenInput.classList.add('valid');okHint.textContent='Token verified — '+state.studentName;okHint.classList.add('show');btn.disabled=false;spinner.style.display='none';txt.textContent='Verify Token';return;}tokenInput.classList.add('valid');okHint.textContent='Verified — '+state.studentName;okHint.classList.add('show');setTimeout(()=>goToStep(2),400);}catch(e){msgBox.textContent='Network error — please try again.';msgBox.className='msg-box err show';btn.disabled=false;spinner.style.display='none';txt.textContent='Verify Token';}}
-document.getElementById('tokenBtn').addEventListener('click',verifyToken);
-function selectDay(day){state.day=day;state.selectedHour=null;document.getElementById('daySat').classList.remove('selected-sat','selected-sun');document.getElementById('daySun').classList.remove('selected-sat','selected-sun');document.getElementById(day==='sat'?'daySat':'daySun').classList.add('selected-'+day);document.getElementById('labLabel').style.display=day==='sun'?'':'none';document.getElementById('dayBtn').disabled=false;}
-function onLabChange(){state.isLab=document.getElementById('labCheck').checked;}
-async function goToStep3(){state.isLab=document.getElementById('labCheck').checked;try{const sess=await db('sessions?day=eq.'+state.day+'&order=hour_start.asc');state.sessions=Array.isArray(sess)?sess:[];const counts=await db('bookings?day=eq.'+state.day+'&select=hour_start');state.bookingCounts={};if(Array.isArray(counts)){counts.forEach(b=>{state.bookingCounts[b.hour_start]=(state.bookingCounts[b.hour_start]||0)+1;});}renderSlots();goToStep(3);}catch(e){alert('Could not load sessions. Please try again.');}}
-function fmt(h){if(h>=24)return'12:00 AM';if(h===12)return'12:00 PM';return h>12?(h-12)+':00 PM':h+':00 AM';}
-function renderSlots(){const grid=document.getElementById('slotsGrid');grid.innerHTML='';state.sessions.forEach(s=>{const isEvening=s.hour_start>=19;const labBlocked=state.isLab&&isEvening;const count=state.bookingCounts[s.hour_start]||0;const remaining=s.capacity-count;const isBlocked=s.blocked||labBlocked;const isFull=remaining<=0;const el=document.createElement('div');el.className='slot-btn'+(isBlocked?' blocked':'')+(isFull&&!isBlocked?' full':'');let pipClass='slot-pip';let metaText='';if(isBlocked){metaText=s.blocked?(s.hour_start===12?'Break':'No session'):'Lab unavailable';pipClass+=' err';}else if(isFull){metaText='Full';pipClass+=' err';}else if(remaining<=2){metaText=remaining+' spot'+(remaining===1?'':'s')+' left';pipClass+=' warn';}else{metaText=remaining+' spot'+(remaining===1?'':'s')+' left';}el.innerHTML='<div class="slot-time">'+fmt(s.hour_start)+' – '+fmt(s.hour_end)+'</div><div class="slot-meta"><span class="'+pipClass+'"></span>'+metaText+'</div>';if(!isBlocked&&!isFull){el.addEventListener('click',()=>selectSlot(s.hour_start,el));}grid.appendChild(el);});}
-function selectSlot(hour,el){document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');state.selectedHour=hour;document.getElementById('slotBtn').disabled=false;}
-function goToStep4(){const s=state;document.getElementById('confirmDetail').innerHTML='<div class="success-detail-row"><span class="lbl">Student</span><span class="val">'+s.studentName+'</span></div><div class="success-detail-row"><span class="lbl">Index No</span><span class="val">'+s.studentIndex+'</span></div><div class="success-detail-row"><span class="lbl">Token</span><span class="val">'+s.token+'</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">'+(s.day==='sat'?SAT_DATE:SUN_DATE)+'</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">'+fmt(s.selectedHour)+' – '+fmt(s.selectedHour+1)+'</span></div><div class="success-detail-row"><span class="lbl">Lab computer</span><span class="val">'+(s.isLab?'Yes':'No')+'</span></div>';goToStep(4);}
-async function submitBooking(){const btn=document.getElementById('confirmBtn');const spinner=document.getElementById('confirmSpinner');const txt=document.getElementById('confirmBtnTxt');const msgBox=document.getElementById('confirmMsg');btn.disabled=true;spinner.style.display='';txt.textContent='Booking…';msgBox.className='msg-box';const s=state;try{const chk=await db('bookings?token=eq.'+encodeURIComponent(s.token)+'&select=id');if(Array.isArray(chk)&&chk.length>0){msgBox.textContent='You already have a booking.';msgBox.className='msg-box err show';btn.disabled=false;spinner.style.display='none';txt.textContent='Confirm Booking';return;}const counts=await db('bookings?day=eq.'+s.day+'&hour_start=eq.'+s.selectedHour+'&select=id');const session=s.sessions.find(x=>x.hour_start===s.selectedHour);if(Array.isArray(counts)&&counts.length>=session.capacity){msgBox.textContent='This slot just filled up. Please go back and choose another.';msgBox.className='msg-box err show';btn.disabled=false;spinner.style.display='none';txt.textContent='Confirm Booking';return;}const res=await fetch(SUPABASE_URL+'/rest/v1/bookings',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Prefer':'return=minimal'},body:JSON.stringify({token:s.token,student_name:s.studentName,student_index:s.studentIndex,day:s.day,hour_start:s.selectedHour,is_lab_computer:s.isLab})});if(!res.ok){const err=await res.text();throw new Error(err);}showSuccess();}catch(e){msgBox.textContent='Booking failed: '+e.message;msgBox.className='msg-box err show';btn.disabled=false;spinner.style.display='none';txt.textContent='Confirm Booking';}}
-function showSuccess(){const s=state;['step1Card','step2Card','step3Card','step4Card'].forEach(id=>{document.getElementById(id).style.display='none';});document.getElementById('stepsNav').style.display='none';document.getElementById('successDetail').innerHTML='<div class="success-detail-row"><span class="lbl">Token</span><span class="val">'+s.token+'</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">'+(s.day==='sat'?SAT_DATE:SUN_DATE)+'</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">'+fmt(s.selectedHour)+' – '+fmt(s.selectedHour+1)+'</span></div>';document.getElementById('successNote').innerHTML='Return to <a href="'+QUEUE_PAGE+'" style="color:var(--accent2)">the queue page</a> during your window and join the queue. <strong>Enable browser notifications</strong> when prompted so you know when it's your turn.';document.getElementById('successScreen').classList.add('show');window.scrollTo({top:0,behavior:'smooth'});}
-</script>
-</body>
+      const db = (path, opts = {}) =>
+        fetch(SUPABASE_URL + "/rest/v1/" + path, {
+          headers: {
+            apikey: SUPABASE_ANON,
+            Authorization: "Bearer " + SUPABASE_ANON,
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+            ...opts.headers,
+          },
+          ...opts,
+        }).then((r) => r.json());
+      let state = {
+        step: 1,
+        token: "",
+        studentName: "",
+        studentIndex: "",
+        day: null,
+        isLab: false,
+        sessions: [],
+        selectedHour: null,
+      };
+      document.getElementById("satDate").textContent = SAT_DATE;
+      document.getElementById("sunDate").textContent = SUN_DATE;
+      const tokenInput = document.getElementById("tokenInput");
+      tokenInput.addEventListener("input", () => {
+        const v = tokenInput.value.trim().toUpperCase();
+        tokenInput.value = v;
+        document.getElementById("tokenBtn").disabled = v.length < 4;
+        document.getElementById("tokenHint").classList.remove("show");
+        document.getElementById("tokenOk").classList.remove("show");
+        tokenInput.classList.remove("invalid", "valid");
+      });
+      tokenInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") document.getElementById("tokenBtn").click();
+      });
+      function goToStep(n) {
+        state.step = n;
+        ["step1Card", "step2Card", "step3Card", "step4Card"].forEach(
+          (id, i) => {
+            document.getElementById(id).style.display =
+              i + 1 === n ? "" : "none";
+          },
+        );
+        document.getElementById("successScreen").classList.remove("show");
+        updateStepsNav(n);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function updateStepsNav(n) {
+        [1, 2, 3, 4].forEach((i) => {
+          const el = document.getElementById("snav" + i);
+          el.classList.remove("active", "done");
+          if (i < n) el.classList.add("done");
+          else if (i === n) el.classList.add("active");
+        });
+      }
+      async function verifyToken() {
+        const token = tokenInput.value.trim().toUpperCase();
+        const btn = document.getElementById("tokenBtn");
+        const spinner = document.getElementById("tokenSpinner");
+        const txt = document.getElementById("tokenBtnTxt");
+        const hint = document.getElementById("tokenHint");
+        const okHint = document.getElementById("tokenOk");
+        const msgBox = document.getElementById("tokenMsg");
+        btn.disabled = true;
+        spinner.style.display = "";
+        txt.textContent = "Verifying…";
+        hint.classList.remove("show");
+        okHint.classList.remove("show");
+        msgBox.className = "msg-box";
+        msgBox.style.display = "none";
+        try {
+          const sub = await db(
+            "ios_submissions?submission_code=eq." +
+              encodeURIComponent(token) +
+              "&select=submission_code,student_name,student_index",
+          );
+          if (!Array.isArray(sub)) {
+            console.error("Supabase error response:", sub);
+          }
+          if (!Array.isArray(sub) || sub.length === 0) {
+            tokenInput.classList.add("invalid");
+            hint.textContent = Array.isArray(sub)
+              ? "Token not found. Check your submission acknowledgement."
+              : "Server error — check console for details (likely a Supabase RLS policy issue).";
+            hint.classList.add("show");
+            btn.disabled = false;
+            spinner.style.display = "none";
+            txt.textContent = "Verify Token";
+            return;
+          }
+          state.token = token;
+          state.studentName = sub[0].student_name || "";
+          state.studentIndex = sub[0].student_index || "";
+          const existing = await db(
+            "bookings?token=eq." +
+              encodeURIComponent(token) +
+              "&select=day,hour_start",
+          );
+          if (Array.isArray(existing) && existing.length > 0) {
+            const b = existing[0];
+            const banner = document.getElementById("bookedBanner");
+            banner.innerHTML =
+              "✓ Already booked: <strong>" +
+              b.day.toUpperCase() +
+              "</strong> · " +
+              fmt(b.hour_start) +
+              "–" +
+              fmt(b.hour_start + 1) +
+              '. <a href="' +
+              QUEUE_PAGE +
+              '" style="color:var(--ok);text-decoration:underline">Go to queue →</a>';
+            banner.style.display = "";
+            tokenInput.classList.add("valid");
+            okHint.textContent = "Token verified — " + state.studentName;
+            okHint.classList.add("show");
+            btn.disabled = false;
+            spinner.style.display = "none";
+            txt.textContent = "Verify Token";
+            return;
+          }
+          tokenInput.classList.add("valid");
+          okHint.textContent = "Verified — " + state.studentName;
+          okHint.classList.add("show");
+          setTimeout(() => goToStep(2), 400);
+        } catch (e) {
+          msgBox.textContent = "Network error — please try again.";
+          msgBox.className = "msg-box err show";
+          btn.disabled = false;
+          spinner.style.display = "none";
+          txt.textContent = "Verify Token";
+        }
+      }
+      document
+        .getElementById("tokenBtn")
+        .addEventListener("click", verifyToken);
+      function selectDay(day) {
+        state.day = day;
+        state.selectedHour = null;
+        document
+          .getElementById("daySat")
+          .classList.remove("selected-sat", "selected-sun");
+        document
+          .getElementById("daySun")
+          .classList.remove("selected-sat", "selected-sun");
+        document
+          .getElementById(day === "sat" ? "daySat" : "daySun")
+          .classList.add("selected-" + day);
+        document.getElementById("labLabel").style.display =
+          day === "sun" ? "" : "none";
+        document.getElementById("dayBtn").disabled = false;
+      }
+      function onLabChange() {
+        state.isLab = document.getElementById("labCheck").checked;
+      }
+      async function goToStep3() {
+        state.isLab = document.getElementById("labCheck").checked;
+        try {
+          const sess = await db(
+            "sessions?day=eq." + state.day + "&order=hour_start.asc",
+          );
+          state.sessions = Array.isArray(sess) ? sess : [];
+          const counts = await db(
+            "bookings?day=eq." + state.day + "&select=hour_start",
+          );
+          state.bookingCounts = {};
+          if (Array.isArray(counts)) {
+            counts.forEach((b) => {
+              state.bookingCounts[b.hour_start] =
+                (state.bookingCounts[b.hour_start] || 0) + 1;
+            });
+          }
+          renderSlots();
+          goToStep(3);
+        } catch (e) {
+          alert("Could not load sessions. Please try again.");
+        }
+      }
+      function fmt(h) {
+        if (h >= 24) return "12:00 AM";
+        if (h === 12) return "12:00 PM";
+        return h > 12 ? h - 12 + ":00 PM" : h + ":00 AM";
+      }
+      function renderSlots() {
+        const grid = document.getElementById("slotsGrid");
+        grid.innerHTML = "";
+        state.sessions.forEach((s) => {
+          const isEvening = s.hour_start >= 19;
+          const labBlocked = state.isLab && isEvening;
+          const count = state.bookingCounts[s.hour_start] || 0;
+          const remaining = s.capacity - count;
+          const isBlocked = s.blocked || labBlocked;
+          const isFull = remaining <= 0;
+          const el = document.createElement("div");
+          el.className =
+            "slot-btn" +
+            (isBlocked ? " blocked" : "") +
+            (isFull && !isBlocked ? " full" : "");
+          let pipClass = "slot-pip";
+          let metaText = "";
+          if (isBlocked) {
+            metaText = s.blocked
+              ? s.hour_start === 12
+                ? "Break"
+                : "No session"
+              : "Lab unavailable";
+            pipClass += " err";
+          } else if (isFull) {
+            metaText = "Full";
+            pipClass += " err";
+          } else if (remaining <= 2) {
+            metaText =
+              remaining + " spot" + (remaining === 1 ? "" : "s") + " left";
+            pipClass += " warn";
+          } else {
+            metaText =
+              remaining + " spot" + (remaining === 1 ? "" : "s") + " left";
+          }
+          el.innerHTML =
+            '<div class="slot-time">' +
+            fmt(s.hour_start) +
+            " – " +
+            fmt(s.hour_end) +
+            '</div><div class="slot-meta"><span class="' +
+            pipClass +
+            '"></span>' +
+            metaText +
+            "</div>";
+          if (!isBlocked && !isFull) {
+            el.addEventListener("click", () => selectSlot(s.hour_start, el));
+          }
+          grid.appendChild(el);
+        });
+      }
+      function selectSlot(hour, el) {
+        document
+          .querySelectorAll(".slot-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        el.classList.add("selected");
+        state.selectedHour = hour;
+        document.getElementById("slotBtn").disabled = false;
+      }
+      function goToStep4() {
+        const s = state;
+        document.getElementById("confirmDetail").innerHTML =
+          '<div class="success-detail-row"><span class="lbl">Student</span><span class="val">' +
+          s.studentName +
+          '</span></div><div class="success-detail-row"><span class="lbl">Index No</span><span class="val">' +
+          s.studentIndex +
+          '</span></div><div class="success-detail-row"><span class="lbl">Token</span><span class="val">' +
+          s.token +
+          '</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">' +
+          (s.day === "sat" ? SAT_DATE : SUN_DATE) +
+          '</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">' +
+          fmt(s.selectedHour) +
+          " – " +
+          fmt(s.selectedHour + 1) +
+          '</span></div><div class="success-detail-row"><span class="lbl">Lab computer</span><span class="val">' +
+          (s.isLab ? "Yes" : "No") +
+          "</span></div>";
+        goToStep(4);
+      }
+      async function submitBooking() {
+        const btn = document.getElementById("confirmBtn");
+        const spinner = document.getElementById("confirmSpinner");
+        const txt = document.getElementById("confirmBtnTxt");
+        const msgBox = document.getElementById("confirmMsg");
+        btn.disabled = true;
+        spinner.style.display = "";
+        txt.textContent = "Booking…";
+        msgBox.className = "msg-box";
+        const s = state;
+        try {
+          const chk = await db(
+            "bookings?token=eq." + encodeURIComponent(s.token) + "&select=id",
+          );
+          if (Array.isArray(chk) && chk.length > 0) {
+            msgBox.textContent = "You already have a booking.";
+            msgBox.className = "msg-box err show";
+            btn.disabled = false;
+            spinner.style.display = "none";
+            txt.textContent = "Confirm Booking";
+            return;
+          }
+          const counts = await db(
+            "bookings?day=eq." +
+              s.day +
+              "&hour_start=eq." +
+              s.selectedHour +
+              "&select=id",
+          );
+          const session = s.sessions.find(
+            (x) => x.hour_start === s.selectedHour,
+          );
+          if (Array.isArray(counts) && counts.length >= session.capacity) {
+            msgBox.textContent =
+              "This slot just filled up. Please go back and choose another.";
+            msgBox.className = "msg-box err show";
+            btn.disabled = false;
+            spinner.style.display = "none";
+            txt.textContent = "Confirm Booking";
+            return;
+          }
+          const res = await fetch(SUPABASE_URL + "/rest/v1/bookings", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: SUPABASE_ANON,
+              Authorization: "Bearer " + SUPABASE_ANON,
+              Prefer: "return=minimal",
+            },
+            body: JSON.stringify({
+              token: s.token,
+              student_name: s.studentName,
+              student_index: s.studentIndex,
+              day: s.day,
+              hour_start: s.selectedHour,
+              is_lab_computer: s.isLab,
+            }),
+          });
+          if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err);
+          }
+          showSuccess();
+        } catch (e) {
+          msgBox.textContent = "Booking failed: " + e.message;
+          msgBox.className = "msg-box err show";
+          btn.disabled = false;
+          spinner.style.display = "none";
+          txt.textContent = "Confirm Booking";
+        }
+      }
+      function showSuccess() {
+        const s = state;
+        ["step1Card", "step2Card", "step3Card", "step4Card"].forEach((id) => {
+          document.getElementById(id).style.display = "none";
+        });
+        document.getElementById("stepsNav").style.display = "none";
+        document.getElementById("successDetail").innerHTML =
+          '<div class="success-detail-row"><span class="lbl">Token</span><span class="val">' +
+          s.token +
+          '</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">' +
+          (s.day === "sat" ? SAT_DATE : SUN_DATE) +
+          '</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">' +
+          fmt(s.selectedHour) +
+          " – " +
+          fmt(s.selectedHour + 1) +
+          "</span></div>";
+        document.getElementById("successNote").innerHTML =
+          'Return to <a href="' +
+          QUEUE_PAGE +
+          '" style="color:var(--accent2)">the queue page</a> during your window and join the queue. <strong>Enable browser notifications</strong> when prompted so you know when it\u2019s your turn.';
+        document.getElementById("successScreen").classList.add("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    </script>
+  </body>
 </html>
