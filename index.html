@@ -1,955 +1,1279 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>NIBM IOS Final Submission</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0f1117;
-      --surface: #181c27;
-      --surface2: #1e2334;
-      --border: #2a3045;
-      --border2: #343d55;
-      --ink: #e8eaf0;
-      --muted: #7a85a0;
-      --accent: #4f8ef7;
-      --accent-dim: rgba(79,142,247,.12);
-      --accent-glow: rgba(79,142,247,.25);
-      --ok: #34d399;
-      --ok-dim: rgba(52,211,153,.12);
-      --err: #f87171;
-      --err-dim: rgba(248,113,113,.1);
-      --warn-bg: #1c1508;
-      --warn-border: #78450a;
-      --warn-ink: #fbbf24;
-      --radius: 12px;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'DM Sans', sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-
-    html, body {
-      background: var(--bg);
-      color: var(--ink);
-      font: 15px/1.6 var(--sans);
-      margin: 0;
-      min-height: 100vh;
-    }
-
-    /* Subtle grid background */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(79,142,247,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(79,142,247,.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 40px 20px 60px;
-    }
-
-    /* Header */
-    .header {
-      margin-bottom: 32px;
-    }
-    .header-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(79,142,247,.2);
-      color: var(--accent);
-      font: 600 11px/1 var(--mono);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: 6px 12px;
-      border-radius: 999px;
-      margin-bottom: 16px;
-    }
-    .header-badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity:1; transform:scale(1); }
-      50% { opacity:.4; transform:scale(.7); }
-    }
-    h1 {
-      font: 700 28px/1.2 var(--sans);
-      margin: 0 0 8px;
-      letter-spacing: -.02em;
-    }
-    .sub {
-      color: var(--muted);
-      margin: 0;
-      font-size: 14px;
-    }
-
-    /* Warning */
-    .warning {
-      background: var(--warn-bg);
-      border: 1px solid var(--warn-border);
-      color: var(--warn-ink);
-      padding: 14px 16px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 24px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-    .warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-    /* Progress bar (sticky) */
-    .progress-sticky {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(15,17,23,.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-      margin: 0 -20px 28px;
-    }
-    .progress-row {
-      max-width: 960px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .progress-label {
-      font: 600 12px/1 var(--mono);
-      color: var(--muted);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .bar-track {
-      flex: 1;
-      height: 4px;
-      background: var(--border);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      border-radius: 999px;
-      transition: width .3s ease;
-    }
-    .pct {
-      font: 700 12px/1 var(--mono);
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-    .steps-row {
-      max-width: 960px;
-      margin: 8px auto 0;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font: 500 12px/1 var(--sans);
-      color: var(--muted);
-      padding: 5px 10px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      transition: all .2s;
-    }
-    .step .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--border2);
-      flex-shrink: 0;
-      transition: background .2s;
-    }
-    .step.done {
-      color: var(--ok);
-      border-color: rgba(52,211,153,.3);
-      background: var(--ok-dim);
-    }
-    .step.done .dot { background: var(--ok); }
-
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-bottom: 16px;
-      transition: border-color .2s;
-    }
-    .card:focus-within { border-color: var(--border2); }
-
-    .card-title {
-      font: 700 15px/1 var(--sans);
-      letter-spacing: -.01em;
-      margin: 0 0 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card-title::before {
-      content: attr(data-n);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px; height: 22px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(79,142,247,.2);
-      border-radius: 6px;
-      font: 700 11px/1 var(--mono);
-      color: var(--accent);
-    }
-
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
-
-    label {
-      display: block;
-      font: 600 13px/1 var(--sans);
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      margin-bottom: 8px;
-    }
-
-    input[type=text], select, textarea {
-      width: 100%;
-      padding: 10px 14px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--ink);
-      font: 400 14px/1.5 var(--sans);
-      outline: none;
-      transition: border .15s, box-shadow .15s;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-    input[type=text]:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-    input[type=text].invalid, select.invalid {
-      border-color: var(--err);
-      background: var(--err-dim);
-    }
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a85a0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 36px;
-    }
-    select option { background: #1e2334; }
-
-    .hint {
-      color: var(--err);
-      font-size: 12px;
-      margin-top: 5px;
-      display: none;
-    }
-    .hint.show { display: block; }
-
-    .help-text {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-    .help-text ol, .help-text ul {
-      margin: 6px 0 0 16px;
-      padding: 0;
-    }
-    .help-text li { margin: 4px 0; }
-    .help-text code {
-      font: 400 12px/1 var(--mono);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 1px 5px;
-      border-radius: 4px;
-      color: var(--accent);
-    }
-
-    hr { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-
-    /* Declaration */
-    .decl-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 14px;
-      line-height: 1.6;
-    }
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-    input[type=checkbox] {
-      width: 18px; height: 18px;
-      accent-color: var(--accent);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .checkbox-row span { font: 500 14px/1.4 var(--sans); }
-
-    /* Error panel */
-    .error-panel {
-      background: var(--err-dim);
-      border: 1px solid rgba(248,113,113,.25);
-      color: #fca5a5;
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      display: none;
-    }
-    .error-panel strong { display: block; margin-bottom: 8px; }
-    .error-panel ul { margin: 0 0 0 16px; padding: 0; }
-    .error-panel li { margin: 3px 0; }
-
-    /* Actions */
-    .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-
-    .btn {
-      appearance: none;
-      border: none;
-      padding: 11px 20px;
-      border-radius: 10px;
-      font: 700 14px/1 var(--sans);
-      cursor: pointer;
-      transition: all .15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 0 0 0 var(--accent-glow);
-    }
-    .btn-primary:hover:not([disabled]) {
-      filter: brightness(1.1);
-      box-shadow: 0 0 16px var(--accent-glow);
-    }
-    .btn-primary[disabled] { opacity: .4; cursor: not-allowed; }
-    .btn-primary:active:not([disabled]) { transform: translateY(1px); }
-
-    /* Success screen */
-    .success-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .success-screen.show { display: flex; }
-    .success-icon {
-      width: 72px; height: 72px;
-      background: var(--ok-dim);
-      border: 2px solid rgba(52,211,153,.4);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      margin-bottom: 24px;
-      animation: pop .4s cubic-bezier(.34,1.56,.64,1) forwards;
-    }
-    @keyframes pop {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-    .success-title {
-      font: 700 24px/1.2 var(--sans);
-      margin: 0 0 8px;
-      letter-spacing: -.02em;
-    }
-    .success-sub {
-      color: var(--muted);
-      font-size: 14px;
-      margin: 0 0 32px;
-    }
-    .code-display {
-      background: var(--surface);
-      border: 2px solid rgba(52,211,153,.3);
-      border-radius: 16px;
-      padding: 28px 40px;
-      margin-bottom: 20px;
-    }
-    .code-label {
-      font: 600 11px/1 var(--mono);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-    .code-value {
-      font: 700 36px/1 var(--mono);
-      color: var(--ok);
-      letter-spacing: .05em;
-    }
-    .code-copy-btn {
-      background: var(--ok-dim);
-      border: 1px solid rgba(52,211,153,.3);
-      color: var(--ok);
-      padding: 10px 24px;
-      border-radius: 10px;
-      font: 700 14px/1 var(--sans);
-      cursor: pointer;
-      transition: all .15s;
-      margin-bottom: 32px;
-    }
-    .code-copy-btn:hover { background: rgba(52,211,153,.2); }
-
-    .next-steps {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      text-align: left;
-      max-width: 480px;
-      width: 100%;
-    }
-    .next-steps-title {
-      font: 700 13px/1 var(--sans);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-    .next-step-item {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-    .next-step-num {
-      width: 22px; height: 22px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(79,142,247,.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font: 700 11px/1 var(--mono);
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    /* Submitting overlay */
-    .submitting-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(15,17,23,.85);
-      backdrop-filter: blur(6px);
-      z-index: 9999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
-    .submitting-overlay.show { display: flex; }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--border2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .submitting-text {
-      font: 600 14px/1 var(--mono);
-      color: var(--muted);
-    }
-
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font: 400 12px/1 var(--mono);
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
-
-<!-- Submitting overlay -->
-<div class="submitting-overlay" id="overlay">
-  <div class="spinner"></div>
-  <div class="submitting-text">Submitting…</div>
-</div>
-
-<div class="wrap">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-badge">NIBM · IOS Module · 24.2</div>
-    <h1>Final Submission Form</h1>
-    <p class="sub">Complete all fields and click <strong>Submit</strong>. You'll receive a short code to paste into the LMS.</p>
-  </div>
-
-  <div class="warning">
-    <span class="warning-icon">⚠️</span>
-    <span>This page is <u>not</u> the submission portal. After submitting here, you <strong>must</strong> paste your generated code into the LMS text box to complete your submission. All links must be publicly viewable without login.</span>
-  </div>
-
-  <!-- Progress sticky -->
-  <div class="progress-sticky">
-    <div class="progress-row">
-      <span class="progress-label">Progress</span>
-      <div class="bar-track"><div class="bar-fill" id="progressFill"></div></div>
-      <span class="pct" id="pctLabel">0%</span>
-    </div>
-    <div class="steps-row">
-      <div class="step" id="step-details"><span class="dot"></span>Details</div>
-      <div class="step" id="step-deliverables"><span class="dot"></span>Deliverables</div>
-      <div class="step" id="step-links"><span class="dot"></span>Links</div>
-      <div class="step" id="step-declaration"><span class="dot"></span>Declaration</div>
-      <div class="step" id="step-ready"><span class="dot"></span>Ready</div>
-    </div>
-  </div>
-
-  <!-- Error panel -->
-  <div class="error-panel" id="errorPanel">
-    <strong>Fix the following before submitting:</strong>
-    <ul id="errorList"></ul>
-  </div>
-
-  <!-- === FORM SECTIONS === -->
-
-  <!-- Student Details -->
-  <div class="card">
-    <div class="card-title" data-n="1">Student Details</div>
-    <div class="grid">
-      <div>
-        <label for="student_name">Full Name</label>
-        <input id="student_name" type="text" placeholder="e.g., A. Perera" />
-        <div id="hint_student_name" class="hint">Enter your full name.</div>
-      </div>
-      <div>
-        <label for="student_id">Index No</label>
-        <input id="student_id" type="text" placeholder="COBSCCOMP4Y242P-009" />
-        <div id="hint_student_id" class="hint">Enter your Index No.</div>
-      </div>
-      <div>
-        <label for="batch">Batch</label>
-        <input id="batch" type="text" placeholder="24.2" />
-        <div id="hint_batch" class="hint">Enter your batch (e.g., 24.2).</div>
-      </div>
-      <div>
-        <label for="project_title">App / Project Title</label>
-        <input id="project_title" type="text" placeholder="e.g., Campus Connect" />
-        <div id="hint_project_title" class="hint">Enter your project title.</div>
-      </div>
-      <div>
-        <label for="group_number">Group No. (Part 1)</label>
-        <input id="group_number" type="text" placeholder="e.g., G4" />
-      </div>
-    </div>
-  </div>
-
-  <!-- Deliverables -->
-  <div class="card">
-    <div class="card-title" data-n="2">Deliverables Checklist</div>
-    <div class="grid">
-
-      <div>
-        <label for="app_zip">App Source Code (ZIP uploaded to LMS)</label>
-        <select id="app_zip"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-        <div id="hint_app_zip" class="hint">Select Yes if you uploaded the ZIP file.</div>
-        <div class="help-text">
-          <ol>
-            <li>Export your full project as a <strong>ZIP</strong> including all files needed to run.</li>
-            <li>Upload the ZIP via the LMS assignment file upload.</li>
-            <li>Return here and set this to <strong>Yes</strong>.</li>
-          </ol>
-        </div>
-      </div>
-
-      <div>
-        <label for="git_commit_in_report">Git repo URL + final commit hash in Final Report</label>
-        <select id="git_commit_in_report"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-        <div id="hint_git_commit_in_report" class="hint">Select Yes only if your Final Report includes the Git URL and commit hash.</div>
-        <div class="help-text">
-          <ol>
-            <li>Go to your repo → <strong>Commits</strong> → open your <strong>final commit</strong>.</li>
-            <li>Copy the browser URL (must contain <code>/commit/&lt;sha&gt;</code>).</li>
-            <li>Paste it in Section 3 below and also add it to your Final Report.</li>
-          </ol>
-        </div>
-      </div>
-
-      <div>
-        <label for="final_report_complete">Final Report includes all required sections</label>
-        <select id="final_report_complete"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-        <div id="hint_final_report_complete" class="hint">Select Yes only if all four sections are present.</div>
-        <div class="help-text">
-          Required sections:
-          <ul>
-            <li><strong>Overview</strong> of the app and functionality</li>
-            <li><strong>Development process</strong>, challenges &amp; solutions</li>
-            <li><strong>Advanced iOS feature</strong> description</li>
-            <li><strong>Reflection</strong> on learning outcomes</li>
-          </ul>
-        </div>
-      </div>
-
-      <div>
-        <label for="demo_video">App Demo Video (3–5 min, narrated by me)</label>
-        <select id="demo_video"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-        <div id="hint_demo_video" class="hint">Select Yes only if your narrated video is ready and linked below.</div>
-        <div class="help-text">
-          <ol>
-            <li>Record a <strong>3–5 min</strong> walkthrough of key features.</li>
-            <li>Upload to YouTube → set <strong>Visibility</strong> to <strong>Unlisted</strong>.</li>
-            <li>Copy the Share link and paste in Section 3.</li>
-            <li>Test in incognito to confirm it's publicly accessible.</li>
-          </ol>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Optional -->
-  <div class="card">
-    <div class="card-title" data-n="3">Optional Stretch Goals</div>
-    <div class="grid">
-      <div>
-        <label for="stretch_docs">Comprehensive Code Documentation</label>
-        <select id="stretch_docs"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-      </div>
-      <div>
-        <label for="stretch_future">Future Development Plans</label>
-        <select id="stretch_future"><option value="">Select…</option><option>Yes</option><option>No</option></select>
-      </div>
-    </div>
-  </div>
-
-  <!-- Links -->
-  <div class="card">
-    <div class="card-title" data-n="4">Submission Links</div>
-
-    <label for="github_commit_url">GitHub Final Commit URL</label>
-    <input id="github_commit_url" type="text" placeholder="https://github.com/username/project/commit/abcdef123456…" />
-    <div id="hint_github_commit_url" class="hint">Must be a direct commit URL containing /commit/&lt;sha&gt;.</div>
-    <div class="help-text">
-      <ol>
-        <li>Go to your repo → <strong>Commits</strong> → open the final commit.</li>
-        <li>Copy the URL from your browser bar (e.g., <code>https://github.com/user/repo/commit/abc123…</code>).</li>
-      </ol>
-    </div>
-
-    <hr>
-
-    <label for="youtube_unlisted">YouTube Demo Link (Unlisted)</label>
-    <input id="youtube_unlisted" type="text" placeholder="https://youtu.be/…" />
-    <div id="hint_youtube_unlisted" class="hint">Must be a valid YouTube link set to Unlisted.</div>
-    <div class="help-text">
-      <ol>
-        <li>Set visibility to <strong>Unlisted</strong> (not Private).</li>
-        <li>Copy the Share link and paste here.</li>
-        <li>Verify access in an incognito window.</li>
-      </ol>
-    </div>
-
-  </div>
-
-  <!-- Declaration -->
-  <div class="card">
-    <div class="card-title" data-n="5">Declaration</div>
-    <div class="decl-box">
-      By submitting this form I confirm: this is my individual work; core code is my own; documentation may use AI assistance and images may be sourced online with proper rights/credit; my final GitHub commit matches the submitted ZIP and demo video; the MVP image is accurate and cropped correctly; I understand that false or incomplete information may affect my grade.
-    </div>
-    <label class="checkbox-row">
-      <input id="accept_decl" type="checkbox" />
-      <span>I understand and accept the declaration above.</span>
-    </label>
-    <div id="hint_accept_decl" class="hint" style="margin-top:8px;">You must accept the declaration to proceed.</div>
-  </div>
-
-  <!-- Actions -->
-  <div class="actions">
-    <button class="btn btn-primary" id="submitBtn" disabled>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M9 4l5 4-5 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Submit &amp; Get Code
-    </button>
-    <span id="actionMsg" style="font-size:13px;color:var(--muted);"></span>
-  </div>
-
-  <!-- Success screen (hidden until submit) -->
-  <div class="success-screen" id="successScreen">
-    <div class="success-icon">✓</div>
-    <div class="success-title">Submission recorded!</div>
-    <div class="success-sub">Copy your code and paste it into the LMS text box.</div>
-
-    <div class="code-display">
-      <div class="code-label">Your Submission Code</div>
-      <div class="code-value" id="codeDisplay">—</div>
-    </div>
-
-    <button class="code-copy-btn" id="copyCodeBtn">Copy Code</button>
-
-    <div class="next-steps">
-      <div class="next-steps-title">What to do next</div>
-      <div class="next-step-item">
-        <div class="next-step-num">1</div>
-        <div>Copy the code above using the button.</div>
-      </div>
-      <div class="next-step-item">
-        <div class="next-step-num">2</div>
-        <div>Open the LMS assignment submission page.</div>
-      </div>
-      <div class="next-step-item">
-        <div class="next-step-num">3</div>
-        <div>Paste the code into the <strong>text submission box</strong> and click <strong>Submit</strong>.</div>
-      </div>
-      <div class="next-step-item">
-        <div class="next-step-num">4</div>
-        <div>Make sure you've also uploaded your ZIP file via the LMS file upload.</div>
-      </div>
-    </div>
-  </div>
-
-  <footer>© NM Fuzail 2025 · NIBM iOS Module</footer>
-</div>
-
-<script>
-  // ============================================================
-  // ⚙️  SUPABASE CONFIG — replace with your project values
-  // ============================================================
-  const SUPABASE_URL    = 'https://shfvfibjwqkjqfsmbbax.supabase.co';
-  const SUPABASE_ANON   = 'sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU';
-  const TABLE_NAME      = 'ios_submissions';
-  // ============================================================
-
-  // --- helpers ---
-  const $ = id => document.getElementById(id);
-  const val = id => $(id).value.trim();
-
-  const urlish    = s => /^https?:\/\/[^\s]+$/i.test(s);
-  const isYouTube = s => /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(s);
-  const isImgDirect = s => /^https?:\/\/[^\s]+?\.(png|jpg|jpeg)$/i.test(s);
-  const isImgur   = s => /^https?:\/\/(i\.)?imgur\.com\/.+/i.test(s);
-  const shaFromUrl = s => { const m = s.match(/\/commit\/([0-9a-f]{7,40})/i); return m ? m[1] : ''; };
-
-  function randCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let r = '';
-    for (let i = 0; i < 4; i++) r += chars[Math.floor(Math.random() * chars.length)];
-    return 'IOS-' + r;
-  }
-
-  // --- state ---
-  let submittedOnce = false;
-  const touched = new Set();
-
-  const requiredText = ['student_name','student_id','batch','project_title'];
-  const yesNoIds     = ['app_zip','git_commit_in_report','final_report_complete','demo_video'];
-
-  function setFieldState(id, hintId, isErr, msg, silent) {
-    const el = $( id);
-    const hint = $(hintId);
-    const show = !silent && (submittedOnce || touched.has(id)) && isErr;
-    el?.classList.toggle('invalid', !!show);
-    if (hint) { hint.textContent = msg; hint.classList.toggle('show', !!show); }
-  }
-
-  function checkDetails()      { return requiredText.every(id => !!val(id)); }
-  function checkDeliverables() { return yesNoIds.every(id => /^(Yes|No)$/i.test(val(id))); }
-  function checkDeclaration()  { return $('accept_decl').checked; }
-  function checkLinks() {
-    const gh  = val('github_commit_url');
-    const yt  = val('youtube_unlisted');
-    return urlish(gh) && !!shaFromUrl(gh) &&
-           urlish(yt) && isYouTube(yt);
-  }
-
-  function validate(silent = false) {
-    const errs = [];
-
-    requiredText.forEach(id => {
-      const bad = !val(id);
-      if (bad) errs.push('Missing: ' + id.replace(/_/g,' '));
-      setFieldState(id, 'hint_'+id, bad, 'This field is required.', silent);
-    });
-
-    yesNoIds.forEach(id => {
-      const bad = !/^(Yes|No)$/i.test(val(id));
-      if (bad) errs.push('Select Yes/No for: ' + id.replace(/_/g,' '));
-      setFieldState(id, 'hint_'+id, bad, 'Choose Yes or No.', silent);
-    });
-
-    const gh = val('github_commit_url');
-    if (!urlish(gh)) {
-      errs.push('Invalid GitHub commit URL');
-      setFieldState('github_commit_url','hint_github_commit_url',true,'Enter a valid URL.',silent);
-    } else if (!shaFromUrl(gh)) {
-      errs.push('GitHub URL must contain /commit/<sha>');
-      setFieldState('github_commit_url','hint_github_commit_url',true,'URL must contain /commit/<sha>.',silent);
-    } else {
-      setFieldState('github_commit_url','hint_github_commit_url',false,'',silent);
-    }
-
-    const yt = val('youtube_unlisted');
-    if (!urlish(yt) || !isYouTube(yt)) {
-      errs.push('Invalid YouTube link');
-      setFieldState('youtube_unlisted','hint_youtube_unlisted',true,'Provide a valid YouTube Unlisted link.',silent);
-    } else {
-      setFieldState('youtube_unlisted','hint_youtube_unlisted',false,'',silent);
-    }
-
-    if (!$('accept_decl').checked) {
-      errs.push('Accept the declaration');
-      setFieldState('accept_decl','hint_accept_decl',true,'Tick to confirm.',silent);
-    } else {
-      setFieldState('accept_decl','hint_accept_decl',false,'',silent);
-    }
-
-    // Error panel
-    const panel = $('errorPanel');
-    const ul    = $('errorList');
-    if (!silent && submittedOnce && errs.length) {
-      ul.innerHTML = errs.map(e=>`<li>${e}</li>`).join('');
-      panel.style.display = '';
-    } else {
-      panel.style.display = 'none';
-    }
-
-    // Progress
-    const done = [checkDetails(), checkDeliverables(), checkLinks(), checkDeclaration()];
-    const completedCount = done.filter(Boolean).length;
-    const allDone = completedCount === 4;
-    ['step-details','step-deliverables','step-links','step-declaration'].forEach((id,i)=>{
-      $(id).classList.toggle('done', done[i]);
-    });
-    $('step-ready').classList.toggle('done', allDone);
-    const pct = Math.round(((completedCount + (allDone?1:0)) / 5) * 100);
-    $('progressFill').style.width = pct + '%';
-    $('pctLabel').textContent = pct + '%';
-
-    $('submitBtn').disabled = errs.length > 0;
-    return errs.length === 0;
-  }
-
-  function gather() {
-    return {
-      student_name:            val('student_name'),
-      group_number:            val('group_number') || null,
-      student_index:           val('student_id'),
-      batch:                   val('batch'),
-      project_title:           val('project_title'),
-      app_zip:                 val('app_zip'),
-      git_commit_in_report:    val('git_commit_in_report'),
-      final_report_complete:   val('final_report_complete'),
-      demo_video:              val('demo_video'),
-      stretch_docs:            val('stretch_docs'),
-      stretch_future:          val('stretch_future'),
-      github_commit_url:       val('github_commit_url'),
-      commit_sha:              shaFromUrl(val('github_commit_url')),
-      youtube_url:             val('youtube_unlisted'),
-      submitted_at:            new Date().toISOString(),
-      tz_offset_min:           new Date().getTimezoneOffset() * -1,
-    };
-  }
-
-  async function submitForm() {
-    submittedOnce = true;
-    if (!validate(false)) {
-      $('errorPanel').scrollIntoView({ behavior:'smooth', block:'center' });
-      return;
-    }
-
-    $('overlay').classList.add('show');
-    $('submitBtn').disabled = true;
-
-    const code = randCode();
-    const payload = { ...gather(), submission_code: code };
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'apikey':         SUPABASE_ANON,
-          'Authorization': `Bearer ${SUPABASE_ANON}`,
-          'Prefer':         'return=minimal',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
+  <head>
+    <meta charset="utf-8" />
+    <title>NIBM IOS Final Submission</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #181c27;
+        --surface2: #1e2334;
+        --border: #2a3045;
+        --border2: #343d55;
+        --ink: #e8eaf0;
+        --muted: #7a85a0;
+        --accent: #4f8ef7;
+        --accent-dim: rgba(79, 142, 247, 0.12);
+        --accent-glow: rgba(79, 142, 247, 0.25);
+        --ok: #34d399;
+        --ok-dim: rgba(52, 211, 153, 0.12);
+        --err: #f87171;
+        --err-dim: rgba(248, 113, 113, 0.1);
+        --warn-bg: #1c1508;
+        --warn-border: #78450a;
+        --warn-ink: #fbbf24;
+        --radius: 12px;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "DM Sans", sans-serif;
       }
 
-      // Hide form, show success
-      $('overlay').classList.remove('show');
-      document.querySelectorAll('.card, .actions, .warning, .error-panel').forEach(el => el.style.display = 'none');
-      $('codeDisplay').textContent = code;
-      $('successScreen').classList.add('show');
-      $('successScreen').scrollIntoView({ behavior:'smooth' });
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-    } catch (e) {
-      $('overlay').classList.remove('show');
-      $('submitBtn').disabled = false;
-      $('actionMsg').textContent = '⚠ Submission failed: ' + e.message + ' — check your Supabase config.';
-      $('actionMsg').style.color = 'var(--err)';
-      console.error('Supabase error:', e);
-    }
-  }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.6 var(--sans);
+        margin: 0;
+        min-height: 100vh;
+      }
 
-  async function copyCode() {
-    const code = $('codeDisplay').textContent;
-    await navigator.clipboard.writeText(code);
-    const btn = $('copyCodeBtn');
-    const orig = btn.textContent;
-    btn.textContent = 'Copied ✓';
-    setTimeout(() => btn.textContent = orig, 1200);
-  }
+      /* Subtle grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(79, 142, 247, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(79, 142, 247, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
 
-  // Wire events
-  [...requiredText, ...yesNoIds, 'github_commit_url','youtube_unlisted','mvp_image'].forEach(id => {
-    const el = $(id);
-    if (!el) return;
-    const evt = el.tagName === 'SELECT' ? 'change' : 'input';
-    el.addEventListener(evt, () => { touched.add(id); validate(false); });
-    el.addEventListener('blur',  () => { touched.add(id); validate(false); });
-  });
-  $('accept_decl').addEventListener('change', () => { touched.add('accept_decl'); validate(false); });
-  $('submitBtn').addEventListener('click', submitForm);
-  $('copyCodeBtn').addEventListener('click', copyCode);
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 40px 20px 60px;
+      }
 
-  // Initial silent pass
-  validate(true);
-</script>
- 
-</body>
+      /* Header */
+      .header {
+        margin-bottom: 32px;
+      }
+      .header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent-dim);
+        border: 1px solid rgba(79, 142, 247, 0.2);
+        color: var(--accent);
+        font: 600 11px/1 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        border-radius: 999px;
+        margin-bottom: 16px;
+      }
+      .header-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      h1 {
+        font: 700 28px/1.2 var(--sans);
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0;
+        font-size: 14px;
+      }
+
+      /* Warning */
+      .warning {
+        background: var(--warn-bg);
+        border: 1px solid var(--warn-border);
+        color: var(--warn-ink);
+        padding: 14px 16px;
+        border-radius: var(--radius);
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .warning-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* Progress bar (sticky) */
+      .progress-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(15, 17, 23, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 20px;
+        margin: 0 -20px 28px;
+      }
+      .progress-row {
+        max-width: 960px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .progress-label {
+        font: 600 12px/1 var(--mono);
+        color: var(--muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .bar-track {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--accent);
+        border-radius: 999px;
+        transition: width 0.3s ease;
+      }
+      .pct {
+        font: 700 12px/1 var(--mono);
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+      .steps-row {
+        max-width: 960px;
+        margin: 8px auto 0;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font: 500 12px/1 var(--sans);
+        color: var(--muted);
+        padding: 5px 10px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        transition: all 0.2s;
+      }
+      .step .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--border2);
+        flex-shrink: 0;
+        transition: background 0.2s;
+      }
+      .step.done {
+        color: var(--ok);
+        border-color: rgba(52, 211, 153, 0.3);
+        background: var(--ok-dim);
+      }
+      .step.done .dot {
+        background: var(--ok);
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 16px;
+        transition: border-color 0.2s;
+      }
+      .card:focus-within {
+        border-color: var(--border2);
+      }
+
+      .card-title {
+        font: 700 15px/1 var(--sans);
+        letter-spacing: -0.01em;
+        margin: 0 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-title::before {
+        content: attr(data-n);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: var(--accent-dim);
+        border: 1px solid rgba(79, 142, 247, 0.2);
+        border-radius: 6px;
+        font: 700 11px/1 var(--mono);
+        color: var(--accent);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 640px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      label {
+        display: block;
+        font: 600 13px/1 var(--sans);
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--ink);
+        font: 400 14px/1.5 var(--sans);
+        outline: none;
+        transition:
+          border 0.15s,
+          box-shadow 0.15s;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+      input[type="text"]:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+      }
+      input[type="text"].invalid,
+      select.invalid {
+        border-color: var(--err);
+        background: var(--err-dim);
+      }
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a85a0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+      }
+      select option {
+        background: #1e2334;
+      }
+
+      .hint {
+        color: var(--err);
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+      }
+      .hint.show {
+        display: block;
+      }
+
+      .help-text {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+      .help-text ol,
+      .help-text ul {
+        margin: 6px 0 0 16px;
+        padding: 0;
+      }
+      .help-text li {
+        margin: 4px 0;
+      }
+      .help-text code {
+        font: 400 12px/1 var(--mono);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 1px 5px;
+        border-radius: 4px;
+        color: var(--accent);
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+
+      /* Declaration */
+      .decl-box {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 14px;
+        line-height: 1.6;
+      }
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+      }
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .checkbox-row span {
+        font: 500 14px/1.4 var(--sans);
+      }
+
+      /* Error panel */
+      .error-panel {
+        background: var(--err-dim);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        color: #fca5a5;
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        display: none;
+      }
+      .error-panel strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+      .error-panel ul {
+        margin: 0 0 0 16px;
+        padding: 0;
+      }
+      .error-panel li {
+        margin: 3px 0;
+      }
+
+      /* Actions */
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+
+      .btn {
+        appearance: none;
+        border: none;
+        padding: 11px 20px;
+        border-radius: 10px;
+        font: 700 14px/1 var(--sans);
+        cursor: pointer;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 0 0 0 var(--accent-glow);
+      }
+      .btn-primary:hover:not([disabled]) {
+        filter: brightness(1.1);
+        box-shadow: 0 0 16px var(--accent-glow);
+      }
+      .btn-primary[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .btn-primary:active:not([disabled]) {
+        transform: translateY(1px);
+      }
+
+      /* Success screen */
+      .success-screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 20px;
+      }
+      .success-screen.show {
+        display: flex;
+      }
+      .success-icon {
+        width: 72px;
+        height: 72px;
+        background: var(--ok-dim);
+        border: 2px solid rgba(52, 211, 153, 0.4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin-bottom: 24px;
+        animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .success-title {
+        font: 700 24px/1.2 var(--sans);
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .success-sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0 0 32px;
+      }
+      .code-display {
+        background: var(--surface);
+        border: 2px solid rgba(52, 211, 153, 0.3);
+        border-radius: 16px;
+        padding: 28px 40px;
+        margin-bottom: 20px;
+      }
+      .code-label {
+        font: 600 11px/1 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .code-value {
+        font: 700 36px/1 var(--mono);
+        color: var(--ok);
+        letter-spacing: 0.05em;
+      }
+      .code-copy-btn {
+        background: var(--ok-dim);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        color: var(--ok);
+        padding: 10px 24px;
+        border-radius: 10px;
+        font: 700 14px/1 var(--sans);
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-bottom: 32px;
+      }
+      .code-copy-btn:hover {
+        background: rgba(52, 211, 153, 0.2);
+      }
+
+      .next-steps {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        text-align: left;
+        max-width: 480px;
+        width: 100%;
+      }
+      .next-steps-title {
+        font: 700 13px/1 var(--sans);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .next-step-item {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+      .next-step-num {
+        width: 22px;
+        height: 22px;
+        background: var(--accent-dim);
+        border: 1px solid rgba(79, 142, 247, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 700 11px/1 var(--mono);
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+
+      /* Submitting overlay */
+      .submitting-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 17, 23, 0.85);
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+      .submitting-overlay.show {
+        display: flex;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border2);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .submitting-text {
+        font: 600 14px/1 var(--mono);
+        color: var(--muted);
+      }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font: 400 12px/1 var(--mono);
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Submitting overlay -->
+    <div class="submitting-overlay" id="overlay">
+      <div class="spinner"></div>
+      <div class="submitting-text">Submitting…</div>
+    </div>
+
+    <div class="wrap">
+      <!-- Header -->
+      <div class="header">
+        <div class="header-badge">NIBM · IOS Module · 24.2</div>
+        <h1>Final Submission Form</h1>
+        <p class="sub">
+          Complete all fields and click <strong>Submit</strong>. You'll receive
+          a short code to paste into the LMS.
+        </p>
+      </div>
+
+      <div class="warning">
+        <span class="warning-icon">⚠️</span>
+        <span
+          >This page is <u>not</u> the submission portal. After submitting here,
+          you <strong>must</strong> paste your generated code into the LMS text
+          box to complete your submission. All links must be publicly viewable
+          without login.</span
+        >
+      </div>
+
+      <!-- Progress sticky -->
+      <div class="progress-sticky">
+        <div class="progress-row">
+          <span class="progress-label">Progress</span>
+          <div class="bar-track">
+            <div class="bar-fill" id="progressFill"></div>
+          </div>
+          <span class="pct" id="pctLabel">0%</span>
+        </div>
+        <div class="steps-row">
+          <div class="step" id="step-details">
+            <span class="dot"></span>Details
+          </div>
+          <div class="step" id="step-deliverables">
+            <span class="dot"></span>Deliverables
+          </div>
+          <div class="step" id="step-links"><span class="dot"></span>Links</div>
+          <div class="step" id="step-declaration">
+            <span class="dot"></span>Declaration
+          </div>
+          <div class="step" id="step-ready"><span class="dot"></span>Ready</div>
+        </div>
+      </div>
+
+      <!-- Error panel -->
+      <div class="error-panel" id="errorPanel">
+        <strong>Fix the following before submitting:</strong>
+        <ul id="errorList"></ul>
+      </div>
+
+      <!-- === FORM SECTIONS === -->
+
+      <!-- Student Details -->
+      <div class="card">
+        <div class="card-title" data-n="1">Student Details</div>
+        <div class="grid">
+          <div>
+            <label for="student_name">Full Name</label>
+            <input
+              id="student_name"
+              type="text"
+              placeholder="e.g., A. Perera"
+            />
+            <div id="hint_student_name" class="hint">Enter your full name.</div>
+          </div>
+          <div>
+            <label for="student_id">Index No</label>
+            <input
+              id="student_id"
+              type="text"
+              placeholder="COBSCCOMP4Y242P-009"
+            />
+            <div id="hint_student_id" class="hint">Enter your Index No.</div>
+          </div>
+          <div>
+            <label for="batch">Batch</label>
+            <input id="batch" type="text" placeholder="24.2" />
+            <div id="hint_batch" class="hint">
+              Enter your batch (e.g., 24.2).
+            </div>
+          </div>
+          <div>
+            <label for="project_title">App / Project Title</label>
+            <input
+              id="project_title"
+              type="text"
+              placeholder="e.g., Campus Connect"
+            />
+            <div id="hint_project_title" class="hint">
+              Enter your project title.
+            </div>
+          </div>
+          <div>
+            <label for="group_number">Group No. (Part 1)</label>
+            <input id="group_number" type="text" placeholder="e.g., G4" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Deliverables -->
+      <div class="card">
+        <div class="card-title" data-n="2">Deliverables Checklist</div>
+        <div class="grid">
+          <div>
+            <label for="app_zip">App Source Code (ZIP uploaded to LMS)</label>
+            <select id="app_zip">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+            <div id="hint_app_zip" class="hint">
+              Select Yes if you uploaded the ZIP file.
+            </div>
+            <div class="help-text">
+              <ol>
+                <li>
+                  Export your full project as a <strong>ZIP</strong> including
+                  all files needed to run.
+                </li>
+                <li>Upload the ZIP via the LMS assignment file upload.</li>
+                <li>Return here and set this to <strong>Yes</strong>.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div>
+            <label for="git_commit_in_report"
+              >Git repo URL + final commit hash in Final Report</label
+            >
+            <select id="git_commit_in_report">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+            <div id="hint_git_commit_in_report" class="hint">
+              Select Yes only if your Final Report includes the Git URL and
+              commit hash.
+            </div>
+            <div class="help-text">
+              <ol>
+                <li>
+                  Go to your repo → <strong>Commits</strong> → open your
+                  <strong>final commit</strong>.
+                </li>
+                <li>
+                  Copy the browser URL (must contain
+                  <code>/commit/&lt;sha&gt;</code>).
+                </li>
+                <li>
+                  Paste it in Section 3 below and also add it to your Final
+                  Report.
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <div>
+            <label for="final_report_complete"
+              >Final Report includes all required sections</label
+            >
+            <select id="final_report_complete">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+            <div id="hint_final_report_complete" class="hint">
+              Select Yes only if all four sections are present.
+            </div>
+            <div class="help-text">
+              Required sections:
+              <ul>
+                <li><strong>Overview</strong> of the app and functionality</li>
+                <li>
+                  <strong>Development process</strong>, challenges &amp;
+                  solutions
+                </li>
+                <li><strong>Advanced iOS feature</strong> description</li>
+                <li><strong>Reflection</strong> on learning outcomes</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <label for="demo_video"
+              >App Demo Video (3–5 min, narrated by me)</label
+            >
+            <select id="demo_video">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+            <div id="hint_demo_video" class="hint">
+              Select Yes only if your narrated video is ready and linked below.
+            </div>
+            <div class="help-text">
+              <ol>
+                <li>
+                  Record a <strong>3–5 min</strong> walkthrough of key features.
+                </li>
+                <li>
+                  Upload to YouTube → set <strong>Visibility</strong> to
+                  <strong>Unlisted</strong>.
+                </li>
+                <li>Copy the Share link and paste in Section 3.</li>
+                <li>Test in incognito to confirm it's publicly accessible.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Optional -->
+      <div class="card">
+        <div class="card-title" data-n="3">Optional Stretch Goals</div>
+        <div class="grid">
+          <div>
+            <label for="stretch_docs">Comprehensive Code Documentation</label>
+            <select id="stretch_docs">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div>
+            <label for="stretch_future">Future Development Plans</label>
+            <select id="stretch_future">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="card">
+        <div class="card-title" data-n="4">Submission Links</div>
+
+        <label for="github_commit_url">GitHub Final Commit URL</label>
+        <input
+          id="github_commit_url"
+          type="text"
+          placeholder="https://github.com/username/project/commit/abcdef123456…"
+        />
+        <div id="hint_github_commit_url" class="hint">
+          Must be a direct commit URL containing /commit/&lt;sha&gt;.
+        </div>
+        <div class="help-text">
+          <ol>
+            <li>
+              Go to your repo → <strong>Commits</strong> → open the final
+              commit.
+            </li>
+            <li>
+              Copy the URL from your browser bar (e.g.,
+              <code>https://github.com/user/repo/commit/abc123…</code>).
+            </li>
+          </ol>
+        </div>
+
+        <hr />
+
+        <label for="youtube_unlisted">YouTube Demo Link (Unlisted)</label>
+        <input
+          id="youtube_unlisted"
+          type="text"
+          placeholder="https://youtu.be/…"
+        />
+        <div id="hint_youtube_unlisted" class="hint">
+          Must be a valid YouTube link set to Unlisted.
+        </div>
+        <div class="help-text">
+          <ol>
+            <li>Set visibility to <strong>Unlisted</strong> (not Private).</li>
+            <li>Copy the Share link and paste here.</li>
+            <li>Verify access in an incognito window.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Declaration -->
+      <div class="card">
+        <div class="card-title" data-n="5">Declaration</div>
+        <div class="decl-box">
+          By submitting this form I confirm: this is my individual work; core
+          code is my own; documentation may use AI assistance and images may be
+          sourced online with proper rights/credit; my final GitHub commit
+          matches the submitted ZIP and demo video; the MVP image is accurate
+          and cropped correctly; I understand that false or incomplete
+          information may affect my grade.
+        </div>
+        <label class="checkbox-row">
+          <input id="accept_decl" type="checkbox" />
+          <span>I understand and accept the declaration above.</span>
+        </label>
+        <div id="hint_accept_decl" class="hint" style="margin-top: 8px">
+          You must accept the declaration to proceed.
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" id="submitBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M2 8h12M9 4l5 4-5 4"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Submit &amp; Get Code
+        </button>
+        <span
+          id="actionMsg"
+          style="font-size: 13px; color: var(--muted)"
+        ></span>
+      </div>
+
+      <!-- Success screen (hidden until submit) -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Submission recorded!</div>
+        <div class="success-sub">
+          Copy your code and paste it into the LMS text box.
+        </div>
+
+        <div class="code-display">
+          <div class="code-label">Your Submission Code</div>
+          <div class="code-value" id="codeDisplay">—</div>
+        </div>
+
+        <button class="code-copy-btn" id="copyCodeBtn">Copy Code</button>
+
+        <div class="next-steps">
+          <div class="next-steps-title">What to do next</div>
+          <div class="next-step-item">
+            <div class="next-step-num">1</div>
+            <div>Copy the code above using the button.</div>
+          </div>
+          <div class="next-step-item">
+            <div class="next-step-num">2</div>
+            <div>Open the LMS assignment submission page.</div>
+          </div>
+          <div class="next-step-item">
+            <div class="next-step-num">3</div>
+            <div>
+              Paste the code into the <strong>text submission box</strong> and
+              click <strong>Submit</strong>.
+            </div>
+          </div>
+          <div class="next-step-item">
+            <div class="next-step-num">4</div>
+            <div>
+              Make sure you've also uploaded your ZIP file via the LMS file
+              upload.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>© NM Fuzail 2026 · NIBM iOS Module</footer>
+    </div>
+
+    <script>
+      // ============================================================
+      // ⚙️  SUPABASE CONFIG — replace with your project values
+      // ============================================================
+      const SUPABASE_URL = "https://shfvfibjwqkjqfsmbbax.supabase.co";
+      const SUPABASE_ANON = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
+      const TABLE_NAME = "ios_submissions";
+      // ============================================================
+
+      // --- helpers ---
+      const $ = (id) => document.getElementById(id);
+      const val = (id) => $(id).value.trim();
+
+      const urlish = (s) => /^https?:\/\/[^\s]+$/i.test(s);
+      const isYouTube = (s) =>
+        /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(s);
+      const isImgDirect = (s) =>
+        /^https?:\/\/[^\s]+?\.(png|jpg|jpeg)$/i.test(s);
+      const isImgur = (s) => /^https?:\/\/(i\.)?imgur\.com\/.+/i.test(s);
+      const shaFromUrl = (s) => {
+        const m = s.match(/\/commit\/([0-9a-f]{7,40})/i);
+        return m ? m[1] : "";
+      };
+
+      function randCode() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let r = "";
+        for (let i = 0; i < 4; i++)
+          r += chars[Math.floor(Math.random() * chars.length)];
+        return "IOS-" + r;
+      }
+
+      // --- state ---
+      let submittedOnce = false;
+      const touched = new Set();
+
+      const requiredText = [
+        "student_name",
+        "student_id",
+        "batch",
+        "project_title",
+      ];
+      const yesNoIds = [
+        "app_zip",
+        "git_commit_in_report",
+        "final_report_complete",
+        "demo_video",
+      ];
+
+      function setFieldState(id, hintId, isErr, msg, silent) {
+        const el = $(id);
+        const hint = $(hintId);
+        const show = !silent && (submittedOnce || touched.has(id)) && isErr;
+        el?.classList.toggle("invalid", !!show);
+        if (hint) {
+          hint.textContent = msg;
+          hint.classList.toggle("show", !!show);
+        }
+      }
+
+      function checkDetails() {
+        return requiredText.every((id) => !!val(id));
+      }
+      function checkDeliverables() {
+        return yesNoIds.every((id) => /^(Yes|No)$/i.test(val(id)));
+      }
+      function checkDeclaration() {
+        return $("accept_decl").checked;
+      }
+      function checkLinks() {
+        const gh = val("github_commit_url");
+        const yt = val("youtube_unlisted");
+        return urlish(gh) && !!shaFromUrl(gh) && urlish(yt) && isYouTube(yt);
+      }
+
+      function validate(silent = false) {
+        const errs = [];
+
+        requiredText.forEach((id) => {
+          const bad = !val(id);
+          if (bad) errs.push("Missing: " + id.replace(/_/g, " "));
+          setFieldState(
+            id,
+            "hint_" + id,
+            bad,
+            "This field is required.",
+            silent,
+          );
+        });
+
+        yesNoIds.forEach((id) => {
+          const bad = !/^(Yes|No)$/i.test(val(id));
+          if (bad) errs.push("Select Yes/No for: " + id.replace(/_/g, " "));
+          setFieldState(id, "hint_" + id, bad, "Choose Yes or No.", silent);
+        });
+
+        const gh = val("github_commit_url");
+        if (!urlish(gh)) {
+          errs.push("Invalid GitHub commit URL");
+          setFieldState(
+            "github_commit_url",
+            "hint_github_commit_url",
+            true,
+            "Enter a valid URL.",
+            silent,
+          );
+        } else if (!shaFromUrl(gh)) {
+          errs.push("GitHub URL must contain /commit/<sha>");
+          setFieldState(
+            "github_commit_url",
+            "hint_github_commit_url",
+            true,
+            "URL must contain /commit/<sha>.",
+            silent,
+          );
+        } else {
+          setFieldState(
+            "github_commit_url",
+            "hint_github_commit_url",
+            false,
+            "",
+            silent,
+          );
+        }
+
+        const yt = val("youtube_unlisted");
+        if (!urlish(yt) || !isYouTube(yt)) {
+          errs.push("Invalid YouTube link");
+          setFieldState(
+            "youtube_unlisted",
+            "hint_youtube_unlisted",
+            true,
+            "Provide a valid YouTube Unlisted link.",
+            silent,
+          );
+        } else {
+          setFieldState(
+            "youtube_unlisted",
+            "hint_youtube_unlisted",
+            false,
+            "",
+            silent,
+          );
+        }
+
+        if (!$("accept_decl").checked) {
+          errs.push("Accept the declaration");
+          setFieldState(
+            "accept_decl",
+            "hint_accept_decl",
+            true,
+            "Tick to confirm.",
+            silent,
+          );
+        } else {
+          setFieldState("accept_decl", "hint_accept_decl", false, "", silent);
+        }
+
+        // Error panel
+        const panel = $("errorPanel");
+        const ul = $("errorList");
+        if (!silent && submittedOnce && errs.length) {
+          ul.innerHTML = errs.map((e) => `<li>${e}</li>`).join("");
+          panel.style.display = "";
+        } else {
+          panel.style.display = "none";
+        }
+
+        // Progress
+        const done = [
+          checkDetails(),
+          checkDeliverables(),
+          checkLinks(),
+          checkDeclaration(),
+        ];
+        const completedCount = done.filter(Boolean).length;
+        const allDone = completedCount === 4;
+        [
+          "step-details",
+          "step-deliverables",
+          "step-links",
+          "step-declaration",
+        ].forEach((id, i) => {
+          $(id).classList.toggle("done", done[i]);
+        });
+        $("step-ready").classList.toggle("done", allDone);
+        const pct = Math.round(
+          ((completedCount + (allDone ? 1 : 0)) / 5) * 100,
+        );
+        $("progressFill").style.width = pct + "%";
+        $("pctLabel").textContent = pct + "%";
+
+        $("submitBtn").disabled = errs.length > 0;
+        return errs.length === 0;
+      }
+
+      function gather() {
+        return {
+          student_name: val("student_name"),
+          group_number: val("group_number") || null,
+          student_index: val("student_id"),
+          batch: val("batch"),
+          project_title: val("project_title"),
+          app_zip: val("app_zip"),
+          git_commit_in_report: val("git_commit_in_report"),
+          final_report_complete: val("final_report_complete"),
+          demo_video: val("demo_video"),
+          stretch_docs: val("stretch_docs"),
+          stretch_future: val("stretch_future"),
+          github_commit_url: val("github_commit_url"),
+          commit_sha: shaFromUrl(val("github_commit_url")),
+          youtube_url: val("youtube_unlisted"),
+          submitted_at: new Date().toISOString(),
+          tz_offset_min: new Date().getTimezoneOffset() * -1,
+        };
+      }
+
+      async function submitForm() {
+        submittedOnce = true;
+        if (!validate(false)) {
+          $("errorPanel").scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          return;
+        }
+
+        $("overlay").classList.add("show");
+        $("submitBtn").disabled = true;
+
+        const code = randCode();
+        const payload = { ...gather(), submission_code: code };
+
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: SUPABASE_ANON,
+              Authorization: `Bearer ${SUPABASE_ANON}`,
+              Prefer: "return=minimal",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err);
+          }
+
+          // Hide form, show success
+          $("overlay").classList.remove("show");
+          document
+            .querySelectorAll(".card, .actions, .warning, .error-panel")
+            .forEach((el) => (el.style.display = "none"));
+          $("codeDisplay").textContent = code;
+          $("successScreen").classList.add("show");
+          $("successScreen").scrollIntoView({ behavior: "smooth" });
+        } catch (e) {
+          $("overlay").classList.remove("show");
+          $("submitBtn").disabled = false;
+          $("actionMsg").textContent =
+            "⚠ Submission failed: " +
+            e.message +
+            " — check your Supabase config.";
+          $("actionMsg").style.color = "var(--err)";
+          console.error("Supabase error:", e);
+        }
+      }
+
+      async function copyCode() {
+        const code = $("codeDisplay").textContent;
+        await navigator.clipboard.writeText(code);
+        const btn = $("copyCodeBtn");
+        const orig = btn.textContent;
+        btn.textContent = "Copied ✓";
+        setTimeout(() => (btn.textContent = orig), 1200);
+      }
+
+      // Wire events
+      [
+        ...requiredText,
+        ...yesNoIds,
+        "github_commit_url",
+        "youtube_unlisted",
+        "mvp_image",
+      ].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        const evt = el.tagName === "SELECT" ? "change" : "input";
+        el.addEventListener(evt, () => {
+          touched.add(id);
+          validate(false);
+        });
+        el.addEventListener("blur", () => {
+          touched.add(id);
+          validate(false);
+        });
+      });
+      $("accept_decl").addEventListener("change", () => {
+        touched.add("accept_decl");
+        validate(false);
+      });
+      $("submitBtn").addEventListener("click", submitForm);
+      $("copyCodeBtn").addEventListener("click", copyCode);
+
+      // Initial silent pass
+      validate(true);
+    </script>
+  </body>
 </html>
