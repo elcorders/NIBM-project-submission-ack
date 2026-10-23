@@ -310,6 +310,11 @@
         border-color: var(--sun);
         background: var(--sun-dim);
       }
+      .day-card.disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
       .day-icon {
         font-size: 24px;
         margin-bottom: 8px;
@@ -334,6 +339,12 @@
         border-radius: 10px;
         margin-bottom: 20px;
         cursor: pointer;
+        text-transform: none;
+        letter-spacing: normal;
+        font-family: "DM Sans", sans-serif;
+        font-weight: 400;
+        font-size: 15px;
+        color: var(--ink);
       }
       .lab-check input[type="checkbox"] {
         width: 18px;
@@ -671,7 +682,19 @@
       </div>
       <div class="card" id="step2Card" style="display: none">
         <div class="card-title">Select your day</div>
-        <div class="card-sub">Choose which day your viva is scheduled.</div>
+        <div class="card-sub">
+          Tell us about your computer first, then choose a date.
+        </div>
+        <label class="lab-check" id="labLabel">
+          <input type="checkbox" id="labCheck" onchange="onLabChange()" />
+          <div class="lab-check-text">
+            I am using a lab computer
+            <small
+              >Lab students are scheduled on <strong>Sat 31 Oct</strong>
+              only.</small
+            >
+          </div>
+        </label>
         <div class="day-grid">
           <div class="day-card" id="daySat" onclick="selectDay('sat')">
             <div class="day-icon">🗓</div>
@@ -679,21 +702,11 @@
             <div class="day-date" id="satDate">—</div>
           </div>
           <div class="day-card" id="daySun" onclick="selectDay('sun')">
-            <div class="day-icon">☀️</div>
-            <div class="day-name">Sunday</div>
+            <div class="day-icon">🗓</div>
+            <div class="day-name">Saturday</div>
             <div class="day-date" id="sunDate">—</div>
           </div>
         </div>
-        <label class="lab-check" id="labLabel" style="display: none">
-          <input type="checkbox" id="labCheck" onchange="onLabChange()" />
-          <div class="lab-check-text">
-            I am using a lab computer
-            <small
-              >Evening slots (7pm–11pm) will not be available on lab
-              computers.</small
-            >
-          </div>
-        </label>
         <button class="btn-primary" id="dayBtn" disabled onclick="goToStep3()">
           Continue to Slot Selection
         </button>
@@ -744,8 +757,10 @@
       const SUPABASE_URL = "https://shfvfibjwqkjqfsmbbax.supabase.co";
       const SUPABASE_ANON = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
       const QUEUE_PAGE = "./queue.html";
-      const SAT_DATE = "Sat 10 May 2026";
-      const SUN_DATE = "Sun 11 May 2026";
+      // Internal keys stay 'sat' / 'sun' so existing Supabase rows keep working.
+      // 'sat' = 24 Oct (non-lab only), 'sun' = 31 Oct (lab + non-lab).
+      const SAT_DATE = "Sat 24 Oct 2026";
+      const SUN_DATE = "Sat 31 Oct 2026";
 
       const db = (path, opts = {}) =>
         fetch(SUPABASE_URL + "/rest/v1/" + path, {
@@ -850,7 +865,7 @@
             const banner = document.getElementById("bookedBanner");
             banner.innerHTML =
               "✓ Already booked: <strong>" +
-              b.day.toUpperCase() +
+              (b.day === "sat" ? SAT_DATE : SUN_DATE) +
               "</strong> · " +
               fmt(b.hour_start) +
               "–" +
@@ -883,6 +898,8 @@
         .getElementById("tokenBtn")
         .addEventListener("click", verifyToken);
       function selectDay(day) {
+        // lab students can only book the 31st ('sun' key)
+        if (state.isLab && day === "sat") return;
         state.day = day;
         state.selectedHour = null;
         document
@@ -894,15 +911,24 @@
         document
           .getElementById(day === "sat" ? "daySat" : "daySun")
           .classList.add("selected-" + day);
-        document.getElementById("labLabel").style.display =
-          day === "sun" ? "" : "none";
         document.getElementById("dayBtn").disabled = false;
       }
       function onLabChange() {
         state.isLab = document.getElementById("labCheck").checked;
+        const satCard = document.getElementById("daySat");
+        if (state.isLab) {
+          satCard.classList.add("disabled");
+          selectDay("sun"); // auto-select 31 Oct
+        } else {
+          satCard.classList.remove("disabled");
+        }
       }
       async function goToStep3() {
         state.isLab = document.getElementById("labCheck").checked;
+        if (state.isLab && state.day === "sat") {
+          alert("Lab students can only book Sat 31 Oct.");
+          return;
+        }
         try {
           const sess = await db(
             "sessions?day=eq." + state.day + "&order=hour_start.asc",
@@ -932,6 +958,8 @@
       function renderSlots() {
         const grid = document.getElementById("slotsGrid");
         grid.innerHTML = "";
+        state.selectedHour = null;
+        document.getElementById("slotBtn").disabled = true;
         state.sessions.forEach((s) => {
           const isEvening = s.hour_start >= 19;
           const labBlocked = state.isLab && isEvening;
@@ -1019,6 +1047,15 @@
         msgBox.className = "msg-box";
         const s = state;
         try {
+          if (s.isLab && s.day === "sat") {
+            msgBox.textContent =
+              "Lab students can only book Sat 31 Oct. Please go back and change the date.";
+            msgBox.className = "msg-box err show";
+            btn.disabled = false;
+            spinner.style.display = "none";
+            txt.textContent = "Confirm Booking";
+            return;
+          }
           const chk = await db(
             "bookings?token=eq." + encodeURIComponent(s.token) + "&select=id",
           );
@@ -1067,12 +1104,29 @@
             }),
           });
           if (!res.ok) {
-            const err = await res.text();
-            throw new Error(err);
+            const raw = await res.text();
+            let m = raw;
+            try {
+              m = JSON.parse(raw).message || raw;
+            } catch (_) {}
+            if (/full/i.test(m)) {
+              throw new Error(
+                "This slot just filled up. Please go back and choose another.",
+              );
+            } else if (/not available|No session/i.test(m)) {
+              throw new Error(
+                "This slot is not available. Please go back and choose another.",
+              );
+            } else if (/bookings_lab_day_check/.test(m)) {
+              throw new Error("Lab students can only book Sat 31 Oct.");
+            } else if (/bookings_token_key|duplicate key/i.test(m)) {
+              throw new Error("You already have a booking.");
+            }
+            throw new Error(m);
           }
           showSuccess();
         } catch (e) {
-          msgBox.textContent = "Booking failed: " + e.message;
+          msgBox.textContent = e.message;
           msgBox.className = "msg-box err show";
           btn.disabled = false;
           spinner.style.display = "none";
