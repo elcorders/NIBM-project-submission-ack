@@ -603,7 +603,7 @@
     <div class="wrap">
       <!-- Header -->
       <div class="header">
-        <div class="header-badge">NIBM · IOS Module · 24.2</div>
+        <div class="header-badge">NIBM · IOS Module · 25.1</div>
         <h1>Final Submission Form</h1>
         <p class="sub">
           Complete all fields and click <strong>Submit</strong>. You'll receive
@@ -616,7 +616,8 @@
         <span
           >This page is <u>not</u> the submission portal. After submitting here,
           you <strong>must</strong> paste your generated code into the LMS text
-          box to complete your submission. All links must be publicly viewable
+          box to complete your submission. Your GitHub repository must be
+          <strong>public</strong> and your YouTube demo link must be viewable
           without login.</span
         >
       </div>
@@ -671,15 +672,15 @@
             <input
               id="student_id"
               type="text"
-              placeholder="COBSCCOMP4Y242P-009"
+              placeholder="COBSCCOMP4Y251P-009"
             />
             <div id="hint_student_id" class="hint">Enter your Index No.</div>
           </div>
           <div>
             <label for="batch">Batch</label>
-            <input id="batch" type="text" placeholder="24.2" />
+            <input id="batch" type="text" placeholder="25.1" />
             <div id="hint_batch" class="hint">
-              Enter your batch (e.g., 24.2).
+              Enter your batch (e.g., 25.1).
             </div>
           </div>
           <div>
@@ -692,10 +693,6 @@
             <div id="hint_project_title" class="hint">
               Enter your project title.
             </div>
-          </div>
-          <div>
-            <label for="group_number">Group No. (Part 1)</label>
-            <input id="group_number" type="text" placeholder="e.g., G4" />
           </div>
         </div>
       </div>
@@ -718,9 +715,13 @@
               <ol>
                 <li>
                   Export your full project as a <strong>ZIP</strong> including
-                  all files needed to run.
+                  all files needed to run. Remove build output (DerivedData,
+                  Pods, .build).
                 </li>
-                <li>Upload the ZIP via the LMS assignment file upload.</li>
+                <li>
+                  Upload the ZIP via the LMS assignment file upload, named
+                  <code>studentid_individual_source_code.zip</code>.
+                </li>
                 <li>Return here and set this to <strong>Yes</strong>.</li>
               </ol>
             </div>
@@ -759,7 +760,8 @@
 
           <div>
             <label for="final_report_complete"
-              >Final Report includes all required sections</label
+              >Final Report (PDF uploaded to LMS) includes all required
+              sections</label
             >
             <select id="final_report_complete">
               <option value="">Select…</option>
@@ -767,10 +769,11 @@
               <option>No</option>
             </select>
             <div id="hint_final_report_complete" class="hint">
-              Select Yes only if all four sections are present.
+              Select Yes only if all required sections are present and the PDF is uploaded to LMS.
             </div>
             <div class="help-text">
-              Required sections:
+              Required sections (file name:
+              <code>studentid_individual_report.pdf</code>):
               <ul>
                 <li><strong>Overview</strong> of the app and functionality</li>
                 <li>
@@ -778,7 +781,17 @@
                   solutions
                 </li>
                 <li><strong>Advanced iOS feature</strong> description</li>
-                <li><strong>Reflection</strong> on learning outcomes</li>
+                <li>
+                  <strong>External API / backend</strong> used, and how markers
+                  can access it
+                </li>
+                <li>
+                  <strong>Learning Outcomes Reflection</strong> (LO1–LO4; for
+                  LO1, compare design choices across at least two iOS device
+                  types, e.g. iPhone and iPad)
+                </li>
+                <li><strong>LLM use declaration</strong> (if any)</li>
+                <li>Git repo URL and final commit hash</li>
               </ul>
             </div>
           </div>
@@ -809,35 +822,73 @@
               </ol>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Optional -->
-      <div class="card">
-        <div class="card-title" data-n="3">Optional Stretch Goals</div>
-        <div class="grid">
           <div>
-            <label for="stretch_docs">Comprehensive Code Documentation</label>
-            <select id="stretch_docs">
+            <label for="repo_access"
+              >GitHub repository is public (opens without login)</label
+            >
+            <select id="repo_access">
               <option value="">Select…</option>
               <option>Yes</option>
               <option>No</option>
             </select>
+            <div id="hint_repo_access" class="hint">
+              Select Yes only if your commit link opens in an incognito window without signing in.
+            </div>
+            <div class="help-text">
+              <ol>
+                <li>
+                  In GitHub open <strong>Settings → General → Danger Zone</strong>
+                  and set the visibility to <strong>Public</strong>.
+                </li>
+                <li>
+                  Open your commit link in an incognito window to confirm it
+                  loads without signing in.
+                </li>
+              </ol>
+            </div>
           </div>
+
           <div>
-            <label for="stretch_future">Future Development Plans</label>
-            <select id="stretch_future">
+            <label for="readme_backend"
+              >README explains how to run the app and reach my backend</label
+            >
+            <select id="readme_backend">
               <option value="">Select…</option>
               <option>Yes</option>
               <option>No</option>
             </select>
+            <div id="hint_readme_backend" class="hint">
+              Select Yes only if the README covers build, run and backend
+              access.
+            </div>
+            <div class="help-text">
+              Include build steps, and how markers can reach your Firebase,
+              serverless or other API (test account or read-only access). Your
+              repository is public, so do <strong>not</strong> commit
+              passwords, API keys or tokens.
+            </div>
+          </div>
+
+          <div>
+            <label for="tests_included"
+              >Unit tests (Swift Testing) included in the project</label
+            >
+            <select id="tests_included">
+              <option value="">Select…</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+            <div id="hint_tests_included" class="hint">
+              Select Yes only if a Swift Testing test target is in the ZIP.
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Links -->
       <div class="card">
-        <div class="card-title" data-n="4">Submission Links</div>
+        <div class="card-title" data-n="3">Submission Links</div>
 
         <label for="github_commit_url">GitHub Final Commit URL</label>
         <input
@@ -857,6 +908,10 @@
             <li>
               Copy the URL from your browser bar (e.g.,
               <code>https://github.com/user/repo/commit/abc123…</code>).
+            </li>
+            <li>
+              Your repository must be public. Test the link in an incognito
+              window. Commits made after this one are not graded.
             </li>
           </ol>
         </div>
@@ -883,14 +938,14 @@
 
       <!-- Declaration -->
       <div class="card">
-        <div class="card-title" data-n="5">Declaration</div>
+        <div class="card-title" data-n="4">Declaration</div>
         <div class="decl-box">
-          By submitting this form I confirm: this is my individual work; core
-          code is my own; documentation may use AI assistance and images may be
-          sourced online with proper rights/credit; my final GitHub commit
-          matches the submitted ZIP and demo video; the MVP image is accurate
-          and cropped correctly; I understand that false or incomplete
-          information may affect my grade.
+          By submitting this form I confirm: this is my individual work; all code
+          and implementation logic are my own and no LLM was used to generate
+          code; any LLM use for non-code tasks is declared in my final report;
+          my final GitHub commit matches the submitted ZIP and demo video; the
+          my GitHub repository is public; I understand that false
+          or incomplete information may affect my grade.
         </div>
         <label class="checkbox-row">
           <input id="accept_decl" type="checkbox" />
@@ -956,8 +1011,8 @@
           <div class="next-step-item">
             <div class="next-step-num">4</div>
             <div>
-              Make sure you've also uploaded your ZIP file via the LMS file
-              upload.
+              Make sure you've also uploaded your source code ZIP and your Final
+              Report PDF via the LMS file upload.
             </div>
           </div>
         </div>
@@ -1013,6 +1068,9 @@
         "git_commit_in_report",
         "final_report_complete",
         "demo_video",
+        "repo_access",
+        "readme_backend",
+        "tests_included",
       ];
 
       function setFieldState(id, hintId, isErr, msg, silent) {
@@ -1165,7 +1223,7 @@
       function gather() {
         return {
           student_name: val("student_name"),
-          group_number: val("group_number") || null,
+          group_number: null, // group work removed in 25.1; column kept for compatibility
           student_index: val("student_id"),
           batch: val("batch"),
           project_title: val("project_title"),
@@ -1173,8 +1231,8 @@
           git_commit_in_report: val("git_commit_in_report"),
           final_report_complete: val("final_report_complete"),
           demo_video: val("demo_video"),
-          stretch_docs: val("stretch_docs"),
-          stretch_future: val("stretch_future"),
+          stretch_docs: "", // stretch goals removed in 25.1; column kept for compatibility
+          stretch_future: "",
           github_commit_url: val("github_commit_url"),
           commit_sha: shaFromUrl(val("github_commit_url")),
           youtube_url: val("youtube_unlisted"),
