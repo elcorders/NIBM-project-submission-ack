@@ -683,15 +683,16 @@
       <div class="card" id="step2Card" style="display: none">
         <div class="card-title">Select your day</div>
         <div class="card-sub">
-          Tell us about your computer first, then choose a date.
+          Tell us about your computer first. Your date is set automatically.
         </div>
         <label class="lab-check" id="labLabel">
           <input type="checkbox" id="labCheck" onchange="onLabChange()" />
           <div class="lab-check-text">
             I am using a lab computer
             <small
-              >Lab students are scheduled on <strong>Sat 31 Oct</strong>
-              only.</small
+              >Lab students are scheduled on <strong>Sat 31 Oct</strong>.
+              Students using their own computer are scheduled on
+              <strong>Sat 24 Oct</strong>.</small
             >
           </div>
         </label>
@@ -806,6 +807,7 @@
           },
         );
         document.getElementById("successScreen").classList.remove("show");
+        if (n === 2) onLabChange();
         updateStepsNav(n);
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -897,9 +899,13 @@
       document
         .getElementById("tokenBtn")
         .addEventListener("click", verifyToken);
+      // 'sat' (24 Oct) = non-lab only, 'sun' (31 Oct) = lab only
+      function requiredDay() {
+        return state.isLab ? "sun" : "sat";
+      }
       function selectDay(day) {
-        // lab students can only book the 31st ('sun' key)
-        if (state.isLab && day === "sat") return;
+        // date is fixed by lab status; ignore clicks on the other card
+        if (day !== requiredDay()) return;
         state.day = day;
         state.selectedHour = null;
         document
@@ -916,23 +922,21 @@
       function onLabChange() {
         state.isLab = document.getElementById("labCheck").checked;
         const satCard = document.getElementById("daySat");
-        if (state.isLab) {
-          satCard.classList.add("disabled");
-          selectDay("sun"); // auto-select 31 Oct
-        } else {
-          satCard.classList.remove("disabled");
-        }
+        const sunCard = document.getElementById("daySun");
+        satCard.classList.toggle("disabled", state.isLab);
+        sunCard.classList.toggle("disabled", !state.isLab);
+        selectDay(requiredDay());
       }
       async function goToStep3() {
         state.isLab = document.getElementById("labCheck").checked;
-        if (state.isLab && state.day === "sat") {
-          alert("Lab students can only book Sat 31 Oct.");
-          return;
-        }
+        state.day = requiredDay();
         try {
           const sess = await db(
             "sessions?day=eq." + state.day + "&order=hour_start.asc",
           );
+          if (!Array.isArray(sess)) {
+            console.error("Sessions query error:", sess);
+          }
           state.sessions = Array.isArray(sess) ? sess : [];
           const counts = await db(
             "bookings?day=eq." + state.day + "&select=hour_start",
@@ -960,6 +964,11 @@
         grid.innerHTML = "";
         state.selectedHour = null;
         document.getElementById("slotBtn").disabled = true;
+        if (state.sessions.length === 0) {
+          grid.innerHTML =
+            '<div class="msg-box err show" style="grid-column:1/-1;margin:0">No slots found for this day. Please contact your lecturer. (Open the browser console for details.)</div>';
+          return;
+        }
         state.sessions.forEach((s) => {
           const isEvening = s.hour_start >= 19;
           const labBlocked = state.isLab && isEvening;
@@ -1047,9 +1056,9 @@
         msgBox.className = "msg-box";
         const s = state;
         try {
-          if (s.isLab && s.day === "sat") {
+          if (s.day !== requiredDay()) {
             msgBox.textContent =
-              "Lab students can only book Sat 31 Oct. Please go back and change the date.";
+              "Lab students book Sat 31 Oct and others book Sat 24 Oct. Please go back and check your lab selection.";
             msgBox.className = "msg-box err show";
             btn.disabled = false;
             spinner.style.display = "none";
@@ -1118,7 +1127,9 @@
                 "This slot is not available. Please go back and choose another.",
               );
             } else if (/bookings_lab_day_check/.test(m)) {
-              throw new Error("Lab students can only book Sat 31 Oct.");
+              throw new Error(
+                "Lab students book Sat 31 Oct and others book Sat 24 Oct.",
+              );
             } else if (/bookings_token_key|duplicate key/i.test(m)) {
               throw new Error("You already have a booking.");
             }
