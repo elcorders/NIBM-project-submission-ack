@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Book Your Viva Slot — NIBM iOS</title>
+    <title>Viva Queue — NIBM iOS</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
@@ -11,30 +11,25 @@
     <style>
       :root {
         --bg: #080b12;
-        --surface: #0e1220;
-        --surface2: #141929;
-        --border: #1e2740;
-        --border2: #2a3555;
+        --s: #0e1220;
+        --s2: #141929;
+        --b: #1e2740;
+        --b2: #2a3555;
         --ink: #dde3f0;
-        --muted: #5a6480;
-        --muted2: #8490b0;
-        --accent: #4f8ef7;
-        --accent2: #7eb0ff;
+        --m: #5a6480;
+        --m2: #8490b0;
+        --ac: #4f8ef7;
+        --ac2: #7eb0ff;
         --ok: #34d399;
-        --ok-dim: rgba(52, 211, 153, 0.1);
+        --okd: rgba(52, 211, 153, 0.1);
         --err: #f87171;
-        --err-dim: rgba(248, 113, 113, 0.08);
+        --errd: rgba(248, 113, 113, 0.08);
         --warn: #fbbf24;
-        --warn-dim: rgba(251, 191, 36, 0.08);
-        --sat: #a78bfa;
-        --sat-dim: rgba(167, 139, 250, 0.1);
-        --sun: #fb923c;
-        --sun-dim: rgba(251, 146, 60, 0.1);
-        --r: 14px;
+        --warnd: rgba(251, 191, 36, 0.1);
+        --cl: #a78bfa;
+        --cld: rgba(167, 139, 250, 0.1);
       }
-      *,
-      *::before,
-      *::after {
+      * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
@@ -43,1146 +38,975 @@
       body {
         background: var(--bg);
         color: var(--ink);
-        font:
-          15px/1.6 "DM Sans",
-          sans-serif;
+        font: 15px/1.6 "DM Sans", sans-serif;
         min-height: 100vh;
         overflow-x: hidden;
       }
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background:
-          radial-gradient(
-            ellipse 60% 40% at 20% 10%,
-            rgba(79, 142, 247, 0.06) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            ellipse 50% 30% at 80% 80%,
-            rgba(167, 139, 250, 0.04) 0%,
-            transparent 60%
-          );
-        pointer-events: none;
-        z-index: 0;
-      }
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(79, 142, 247, 0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(79, 142, 247, 0.025) 1px, transparent 1px);
-        background-size: 32px 32px;
-        pointer-events: none;
-        z-index: 0;
-      }
-      .page {
-        position: relative;
-        z-index: 1;
-        min-height: 100vh;
+      .topbar {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        padding: 48px 16px 80px;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--b);
+        background: rgba(8, 11, 18, 0.92);
+        position: sticky;
+        top: 0;
+        z-index: 200;
       }
-      .header {
-        text-align: center;
-        margin-bottom: 40px;
-        animation: fadeUp 0.5s ease both;
+      .brand {
+        font: 700 14px/1 "Syne", sans-serif;
       }
-      .nibm-badge {
-        display: inline-flex;
+      .brand span {
+        color: var(--ac);
+      }
+      .right {
+        display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+      }
+      .clock {
+        font: 600 12px/1 "IBM Plex Mono", monospace;
+        color: var(--m2);
+      }
+      .main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 28px 16px 60px;
+      }
+      .wrap {
+        max-width: 440px;
+        margin: 40px auto 0;
+      }
+      .badge {
+        display: inline-block;
+        font: 600 11px/1 "IBM Plex Mono", monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ac2);
         background: rgba(79, 142, 247, 0.08);
         border: 1px solid rgba(79, 142, 247, 0.18);
-        color: var(--accent2);
-        font:
-          600 11px/1 "IBM Plex Mono",
-          monospace;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
         padding: 7px 14px;
         border-radius: 999px;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
       }
-      .nibm-badge::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        background: var(--accent);
-        border-radius: 50%;
-        animation: blink 2s ease-in-out infinite;
-      }
-      @keyframes blink {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.2;
-        }
-      }
-      h1 {
-        font:
-          800 32px/1.1 "Syne",
-          sans-serif;
+      .title {
+        font: 800 28px/1.1 "Syne", sans-serif;
         letter-spacing: -0.03em;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
-      .header-sub {
-        color: var(--muted2);
+      .sub {
+        color: var(--m2);
         font-size: 14px;
-      }
-      .steps-nav {
-        display: flex;
-        align-items: center;
-        margin-bottom: 36px;
-        animation: fadeUp 0.5s 0.1s ease both;
-      }
-      .snav-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font:
-          600 12px/1 "IBM Plex Mono",
-          monospace;
-        color: var(--muted);
-        transition: color 0.2s;
-      }
-      .snav-item.active {
-        color: var(--ink);
-      }
-      .snav-item.done {
-        color: var(--ok);
-      }
-      .snav-num {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 1.5px solid var(--border2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        background: var(--surface);
-        transition: all 0.2s;
-      }
-      .snav-item.active .snav-num {
-        border-color: var(--accent);
-        background: rgba(79, 142, 247, 0.12);
-        color: var(--accent);
-      }
-      .snav-item.done .snav-num {
-        border-color: var(--ok);
-        background: var(--ok-dim);
-        color: var(--ok);
-      }
-      .snav-line {
-        width: 32px;
-        height: 1px;
-        background: var(--border);
-        margin: 0 4px;
-      }
-      @media (max-width: 480px) {
-        .snav-label {
-          display: none;
-        }
-        .snav-line {
-          width: 20px;
-        }
+        margin-bottom: 24px;
       }
       .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--r);
-        width: 100%;
-        max-width: 520px;
-        padding: 28px;
-        animation: fadeUp 0.4s 0.15s ease both;
-      }
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .card-title {
-        font:
-          700 17px/1 "Syne",
-          sans-serif;
-        letter-spacing: -0.01em;
-        margin-bottom: 6px;
-      }
-      .card-sub {
-        color: var(--muted2);
-        font-size: 13px;
-        margin-bottom: 24px;
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 14px;
       }
       label {
         display: block;
-        font:
-          600 11px/1 "IBM Plex Mono",
-          monospace;
+        font: 600 11px/1 "IBM Plex Mono", monospace;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--muted2);
+        color: var(--m2);
         margin-bottom: 8px;
       }
-      .field {
-        margin-bottom: 20px;
-      }
-      input[type="text"] {
+      input,
+      select,
+      textarea {
         width: 100%;
         padding: 12px 16px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
+        background: var(--s2);
+        border: 1px solid var(--b);
         border-radius: 10px;
         color: var(--ink);
-        font:
-          500 15px/1 "IBM Plex Mono",
-          monospace;
+        font: 500 14px/1.4 "DM Sans", sans-serif;
         outline: none;
-        transition:
-          border 0.15s,
-          box-shadow 0.15s;
-        letter-spacing: 0.05em;
+        margin-bottom: 14px;
       }
-      input[type="text"]:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
-      }
-      input[type="text"].invalid {
-        border-color: var(--err);
-        background: var(--err-dim);
-      }
-      input[type="text"].valid {
-        border-color: var(--ok);
-      }
-      .hint {
-        font-size: 12px;
-        margin-top: 6px;
-        color: var(--err);
-        display: none;
-      }
-      .hint.show {
-        display: block;
-      }
-      .ok-hint {
-        font-size: 12px;
-        margin-top: 6px;
-        color: var(--ok);
-        display: none;
-      }
-      .ok-hint.show {
-        display: block;
-      }
-      .day-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-      .day-card {
-        border: 1.5px solid var(--border);
-        border-radius: 12px;
-        padding: 16px;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: var(--surface2);
-        text-align: center;
-        user-select: none;
-      }
-      .day-card:hover {
-        border-color: var(--border2);
-      }
-      .day-card.selected-sat {
-        border-color: var(--sat);
-        background: var(--sat-dim);
-      }
-      .day-card.selected-sun {
-        border-color: var(--sun);
-        background: var(--sun-dim);
-      }
-      .day-card.disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-        pointer-events: none;
-      }
-      .day-icon {
-        font-size: 24px;
+      textarea {
+        resize: vertical;
+        min-height: 68px;
         margin-bottom: 8px;
       }
-      .day-name {
-        font:
-          700 14px/1 "Syne",
-          sans-serif;
-        margin-bottom: 4px;
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--ac);
       }
-      .day-date {
-        font-size: 12px;
-        color: var(--muted2);
+      input.bad {
+        border-color: var(--err);
+        background: var(--errd);
       }
-      .lab-check {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 14px;
-        background: var(--warn-dim);
-        border: 1px solid rgba(251, 191, 36, 0.2);
-        border-radius: 10px;
-        margin-bottom: 20px;
-        cursor: pointer;
-        text-transform: none;
-        letter-spacing: normal;
-        font-family: "DM Sans", sans-serif;
-        font-weight: 400;
-        font-size: 15px;
-        color: var(--ink);
-      }
-      .lab-check input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--warn);
-        cursor: pointer;
-        flex-shrink: 0;
-        margin-top: 2px;
-      }
-      .lab-check-text {
+      select {
+        width: auto;
+        padding: 8px 10px;
+        margin: 0;
         font-size: 13px;
-        color: var(--ink);
       }
-      .lab-check-text small {
-        display: block;
-        color: var(--muted2);
-        font-size: 12px;
-        margin-top: 3px;
+      .btn {
+        width: 100%;
+        padding: 13px;
+        background: var(--ac);
+        border: 0;
+        border-radius: 11px;
+        color: #fff;
+        font: 700 14px/1 "Syne", sans-serif;
+        cursor: pointer;
       }
-      .slots-title {
-        font:
-          600 11px/1 "IBM Plex Mono",
-          monospace;
-        letter-spacing: 0.08em;
+      .btn:hover:not(:disabled) {
+        filter: brightness(1.1);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .sm {
+        width: auto;
+        padding: 8px 14px;
+        font: 600 13px/1 "DM Sans", sans-serif;
+        border-radius: 8px;
+        white-space: nowrap;
+      }
+      .sec {
+        background: var(--s2);
+        border: 1px solid var(--b);
+        color: var(--m2);
+      }
+      .ok {
+        background: var(--ok);
+        color: #052e1f;
+      }
+      .warn {
+        background: var(--warn);
+        color: #3a2a00;
+      }
+      .msg {
+        padding: 11px 14px;
+        border-radius: 9px;
+        font-size: 13px;
+        margin-bottom: 12px;
+        background: var(--errd);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        color: #fca5a5;
+      }
+      .msg.g {
+        background: var(--okd);
+        border-color: rgba(52, 211, 153, 0.25);
+        color: var(--ok);
+      }
+      .msg.w {
+        background: var(--warnd);
+        border-color: rgba(251, 191, 36, 0.25);
+        color: var(--warn);
+      }
+      .hero {
+        text-align: center;
+        padding: 28px 20px 22px;
+        border-bottom: 1px solid var(--b);
+        margin-bottom: 20px;
+      }
+      .lbl {
+        font: 600 11px/1 "IBM Plex Mono", monospace;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--muted2);
+        color: var(--m2);
         margin-bottom: 12px;
       }
-      .slots-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 24px;
+      .num {
+        font: 800 72px/1 "Syne", sans-serif;
+        letter-spacing: -0.04em;
+        margin-bottom: 10px;
       }
-      .slot-btn {
-        border: 1.5px solid var(--border);
-        border-radius: 10px;
-        padding: 12px;
-        background: var(--surface2);
-        cursor: pointer;
-        transition: all 0.18s;
-        text-align: left;
+      .num.p1 {
+        color: var(--ok);
       }
-      .slot-btn:hover:not(.blocked):not(.full) {
-        border-color: var(--border2);
-        background: #1a2035;
+      .num.p2 {
+        color: var(--warn);
       }
-      .slot-btn.selected {
-        border-color: var(--accent);
-        background: rgba(79, 142, 247, 0.1);
+      .st {
+        display: inline-block;
+        padding: 7px 16px;
+        border-radius: 999px;
+        font: 600 13px "DM Sans", sans-serif;
+        background: rgba(79, 142, 247, 0.08);
+        border: 1px solid rgba(79, 142, 247, 0.2);
+        color: var(--ac2);
       }
-      .slot-btn.blocked,
-      .slot-btn.full {
-        opacity: 0.35;
-        cursor: not-allowed;
+      .st.called {
+        background: var(--cld);
+        border-color: rgba(167, 139, 250, 0.3);
+        color: var(--cl);
       }
-      .slot-time {
-        font:
-          600 14px/1 "IBM Plex Mono",
-          monospace;
-        color: var(--ink);
-        margin-bottom: 5px;
+      .st.done {
+        background: var(--okd);
+        border-color: rgba(52, 211, 153, 0.3);
+        color: var(--ok);
       }
-      .slot-meta {
-        font-size: 11px;
-        color: var(--muted2);
+      .eta {
+        font: 600 12px "IBM Plex Mono", monospace;
+        color: var(--m);
+        margin-top: 8px;
+      }
+      .gh {
+        font: 600 11px "IBM Plex Mono", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--m);
+        margin: 16px 0 8px;
+      }
+      .row {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 11px;
+        padding: 10px 12px;
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        margin-bottom: 6px;
       }
-      .slot-pip {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--ok);
+      .row.me {
+        border-color: var(--ac);
+        background: rgba(79, 142, 247, 0.06);
+      }
+      .row.called {
+        border-color: rgba(167, 139, 250, 0.35);
+        background: var(--cld);
+      }
+      .row.done {
+        opacity: 0.45;
+      }
+      .rn {
+        font: 700 13px "IBM Plex Mono", monospace;
+        color: var(--m);
+        width: 24px;
         flex-shrink: 0;
       }
-      .slot-pip.warn {
-        background: var(--warn);
+      .ri {
+        flex: 1;
+        min-width: 0;
       }
-      .slot-pip.err {
-        background: var(--err);
+      .ri b {
+        font-weight: 600;
       }
-      .divider {
-        border: 0;
-        border-top: 1px solid var(--border);
-        margin: 20px 0;
+      .mono {
+        font: 12px "IBM Plex Mono", monospace;
+        color: var(--m2);
       }
-      .btn-primary {
-        width: 100%;
-        padding: 14px;
-        background: var(--accent);
-        border: none;
-        border-radius: 12px;
-        color: #fff;
-        font:
-          700 15px/1 "Syne",
-          sans-serif;
-        cursor: pointer;
-        transition: all 0.18s;
+      .meta {
+        font-size: 12px;
+        color: var(--m2);
+      }
+      .tag {
+        font: 700 10px "IBM Plex Mono", monospace;
+        text-transform: uppercase;
+        padding: 3px 7px;
+        border-radius: 5px;
+        background: var(--warnd);
+        color: var(--warn);
+        margin-left: 4px;
+      }
+      .tag.a {
+        background: rgba(79, 142, 247, 0.14);
+        color: var(--ac2);
+      }
+      .ra {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
+        gap: 6px;
+        flex-shrink: 0;
       }
-      .btn-primary:hover:not([disabled]) {
-        filter: brightness(1.1);
-        box-shadow: 0 0 24px rgba(79, 142, 247, 0.3);
-      }
-      .btn-primary[disabled] {
-        opacity: 0.35;
-        cursor: not-allowed;
-      }
-      .btn-primary:active:not([disabled]) {
-        transform: translateY(1px);
-      }
-      .btn-ghost {
-        width: 100%;
-        padding: 12px;
-        background: transparent;
-        border: 1.5px solid var(--border);
-        border-radius: 12px;
-        color: var(--muted2);
-        font:
-          600 14px/1 "DM Sans",
-          sans-serif;
+      .ab {
+        padding: 6px 11px;
+        border-radius: 7px;
+        font: 600 12px "DM Sans", sans-serif;
         cursor: pointer;
-        margin-top: 10px;
-        transition: all 0.15s;
+        border: 1px solid transparent;
       }
-      .btn-ghost:hover {
-        border-color: var(--border2);
+      .ab.call {
+        background: var(--cld);
+        color: var(--cl);
+        border-color: rgba(167, 139, 250, 0.25);
+      }
+      .ab.dn {
+        background: var(--okd);
+        color: var(--ok);
+        border-color: rgba(52, 211, 153, 0.25);
+      }
+      .ab.rm {
+        background: var(--errd);
+        color: var(--err);
+        border-color: rgba(248, 113, 113, 0.2);
+      }
+      .ab.bk {
+        background: var(--s2);
+        color: var(--m2);
+        border-color: var(--b);
+      }
+      .banner {
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 12px;
+        padding: 13px 16px;
+        margin-bottom: 14px;
+        font-size: 14px;
+        color: var(--m2);
+      }
+      .banner.go {
+        background: var(--warnd);
+        border-color: rgba(251, 191, 36, 0.35);
         color: var(--ink);
       }
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-        display: none;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-      .success-screen {
-        width: 100%;
-        max-width: 520px;
-        display: none;
-        animation: fadeUp 0.4s ease both;
-      }
-      .success-screen.show {
-        display: block;
-      }
-      .success-card {
-        background: var(--surface);
-        border: 1px solid rgba(52, 211, 153, 0.25);
-        border-radius: var(--r);
-        padding: 36px 28px;
-        text-align: center;
-      }
-      .success-icon {
-        width: 64px;
-        height: 64px;
-        background: var(--ok-dim);
-        border: 2px solid rgba(52, 211, 153, 0.35);
-        border-radius: 50%;
+      .ahead {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        margin: 0 auto 20px;
-        animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-      }
-      @keyframes pop {
-        from {
-          transform: scale(0);
-          opacity: 0;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      .success-title {
-        font:
-          800 22px/1.2 "Syne",
-          sans-serif;
-        letter-spacing: -0.02em;
-        margin-bottom: 8px;
-      }
-      .success-sub {
-        color: var(--muted2);
-        font-size: 14px;
-        margin-bottom: 24px;
-      }
-      .success-detail {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px;
-        text-align: left;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
         margin-bottom: 16px;
       }
-      .success-detail-row {
+      .tabs {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 13px;
-        padding: 5px 0;
-        border-bottom: 1px solid var(--border);
+        gap: 6px;
       }
-      .success-detail-row:last-child {
-        border-bottom: none;
+      .tab {
+        padding: 8px 16px;
+        border-radius: 9px;
+        font: 600 13px "DM Sans", sans-serif;
+        cursor: pointer;
+        border: 1.5px solid var(--b);
+        background: var(--s2);
+        color: var(--m2);
       }
-      .success-detail-row .lbl {
-        color: var(--muted2);
-      }
-      .success-detail-row .val {
-        font:
-          600 13px/1 "IBM Plex Mono",
-          monospace;
+      .tab.on {
+        border-color: var(--ac);
         color: var(--ink);
+        background: rgba(79, 142, 247, 0.1);
       }
-      .success-note {
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .stat {
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        padding: 11px;
+        text-align: center;
+      }
+      .stat b {
+        display: block;
+        font: 800 22px/1.2 "Syne", sans-serif;
+      }
+      .stat span {
+        font: 400 11px "IBM Plex Mono", monospace;
+        color: var(--m);
+        text-transform: uppercase;
+      }
+      .mi {
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        padding: 13px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .mi.un {
+        border-color: rgba(79, 142, 247, 0.3);
+        background: rgba(79, 142, 247, 0.04);
+      }
+      .notif {
         background: rgba(79, 142, 247, 0.07);
         border: 1px solid rgba(79, 142, 247, 0.15);
         border-radius: 10px;
-        padding: 14px;
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
         font-size: 13px;
-        color: var(--muted2);
-        text-align: left;
-        line-height: 1.6;
+        color: var(--m2);
       }
-      .success-note strong {
-        color: var(--accent2);
-      }
-      .msg-box {
-        padding: 12px 14px;
-        border-radius: 10px;
-        font-size: 13px;
-        margin-top: 12px;
+      .ov,
+      .mbg {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 11, 18, 0.96);
+        z-index: 500;
         display: none;
-      }
-      .msg-box.show {
-        display: block;
-      }
-      .msg-box.err {
-        background: var(--err-dim);
-        border: 1px solid rgba(248, 113, 113, 0.2);
-        color: #fca5a5;
-      }
-      .msg-box.ok {
-        background: var(--ok-dim);
-        border: 1px solid rgba(52, 211, 153, 0.2);
-        color: var(--ok);
-      }
-      .booked-banner {
-        background: var(--err-dim);
-        border: 1px solid rgba(248, 113, 113, 0.25);
-        border-radius: 10px;
-        padding: 14px 16px;
-        font-size: 13px;
-        color: #fca5a5;
-        margin-bottom: 16px;
-        display: none;
-        line-height: 1.6;
-      }
-      .booked-banner strong {
-        color: var(--ink);
-      }
-      .booked-banner a.queue-link {
-        display: block;
-        margin-top: 12px;
-        padding: 11px;
-        background: var(--accent);
-        color: #fff;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        text-decoration: none;
-        border-radius: 10px;
-        font: 700 14px/1 "Syne", sans-serif;
+        padding: 24px;
+      }
+      .ov.show,
+      .mbg.show {
+        display: flex;
+      }
+      .ov .t {
+        font: 800 34px/1.1 "Syne", sans-serif;
+        color: var(--cl);
+        margin-bottom: 10px;
+      }
+      .ov p {
+        color: var(--m2);
+        margin-bottom: 24px;
+      }
+      .modal {
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 14px;
+        padding: 26px;
+        width: 100%;
+        max-width: 360px;
+        text-align: left;
+      }
+      .link {
+        background: none;
+        border: 0;
+        color: var(--ac);
+        font: 600 12px "IBM Plex Mono", monospace;
+        cursor: pointer;
       }
       footer {
-        margin-top: 48px;
-        font:
-          400 12px/1 "IBM Plex Mono",
-          monospace;
-        color: var(--muted);
         text-align: center;
-        animation: fadeUp 0.4s 0.3s ease both;
+        color: var(--m);
+        font: 400 11px "IBM Plex Mono", monospace;
+        padding: 24px 0;
+      }
+      @media (max-width: 600px) {
+        .stats {
+          grid-template-columns: 1fr 1fr;
+        }
+        .row {
+          flex-wrap: wrap;
+        }
+        .ra {
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="page">
-      <div class="header">
-        <div class="nibm-badge">NIBM · iOS Viva · 2026</div>
-        <h1>Book Your Slot</h1>
-        <p class="header-sub">
-          Enter your token, pick your day and hour window.
-        </p>
-      </div>
-      <div class="steps-nav" id="stepsNav">
-        <div class="snav-item active" id="snav1">
-          <div class="snav-num">1</div>
-          <span class="snav-label">Token</span>
-        </div>
-        <div class="snav-line"></div>
-        <div class="snav-item" id="snav2">
-          <div class="snav-num">2</div>
-          <span class="snav-label">Day</span>
-        </div>
-        <div class="snav-line"></div>
-        <div class="snav-item" id="snav3">
-          <div class="snav-num">3</div>
-          <span class="snav-label">Slot</span>
-        </div>
-        <div class="snav-line"></div>
-        <div class="snav-item" id="snav4">
-          <div class="snav-num">4</div>
-          <span class="snav-label">Confirm</span>
-        </div>
-      </div>
-      <div class="card" id="step1Card">
-        <div class="card-title">Enter your submission token</div>
-        <div class="card-sub">
-          From your iOS Final Submission acknowledgement form.
-        </div>
-        <div class="booked-banner" id="bookedBanner"></div>
-        <div class="field">
-          <label for="tokenInput">Submission Token</label>
-          <input
-            id="tokenInput"
-            type="text"
-            placeholder="IOS-XXXX"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <div id="tokenHint" class="hint"></div>
-          <div id="tokenOk" class="ok-hint"></div>
-        </div>
-        <button class="btn-primary" id="tokenBtn" disabled>
-          <span id="tokenBtnTxt">Verify Token</span>
-          <div class="spinner" id="tokenSpinner"></div>
-        </button>
-        <div class="msg-box" id="tokenMsg"></div>
-      </div>
-      <div class="card" id="step2Card" style="display: none">
-        <div class="card-title">Select your day</div>
-        <div class="card-sub">
-          Tell us about your computer first. Your date is set automatically.
-        </div>
-        <label class="lab-check" id="labLabel">
-          <input type="checkbox" id="labCheck" onchange="onLabChange()" />
-          <div class="lab-check-text">
-            I am using a lab computer
-            <small
-              >Lab students are scheduled on <strong>Sat 31 Oct</strong>.
-              Students using their own computer are scheduled on
-              <strong>Sat 24 Oct</strong>.</small
-            >
-          </div>
-        </label>
-        <div class="day-grid">
-          <div class="day-card" id="daySat" onclick="selectDay('sat')">
-            <div class="day-icon">🗓</div>
-            <div class="day-name">Saturday</div>
-            <div class="day-date" id="satDate">—</div>
-          </div>
-          <div class="day-card" id="daySun" onclick="selectDay('sun')">
-            <div class="day-icon">🗓</div>
-            <div class="day-name">Saturday</div>
-            <div class="day-date" id="sunDate">—</div>
-          </div>
-        </div>
-        <button class="btn-primary" id="dayBtn" disabled onclick="goToStep3()">
-          Continue to Slot Selection
-        </button>
-        <button class="btn-ghost" onclick="goToStep(1)">← Back</button>
-      </div>
-      <div class="card" id="step3Card" style="display: none">
-        <div class="card-title">Pick your hour window</div>
-        <div class="card-sub">
-          Max 5 students per hour · ~10 min per session
-        </div>
-        <div class="slots-title">Available slots</div>
-        <div class="slots-grid" id="slotsGrid"></div>
-        <button class="btn-primary" id="slotBtn" disabled onclick="goToStep4()">
-          Review Booking
-        </button>
-        <button class="btn-ghost" onclick="goToStep(2)">← Back</button>
-      </div>
-      <div class="card" id="step4Card" style="display: none">
-        <div class="card-title">Confirm your booking</div>
-        <div class="card-sub">Review the details below before confirming.</div>
-        <div class="success-detail" id="confirmDetail"></div>
-        <div class="msg-box" id="confirmMsg"></div>
-        <button
-          class="btn-primary"
-          id="confirmBtn"
-          onclick="submitBooking()"
-          style="margin-top: 16px"
-        >
-          <span id="confirmBtnTxt">Confirm Booking</span>
-          <div class="spinner" id="confirmSpinner"></div>
-        </button>
-        <button class="btn-ghost" onclick="goToStep(3)">← Back</button>
-      </div>
-      <div class="success-screen" id="successScreen">
-        <div class="success-card">
-          <div class="success-icon">✓</div>
-          <div class="success-title">Slot booked!</div>
-          <div class="success-sub">
-            Come back during your window to join the queue.
-          </div>
-          <div class="success-detail" id="successDetail"></div>
-          <div class="success-note" id="successNote"></div>
-        </div>
-      </div>
-      <footer>© NM Fuzail 2026 · NIBM iOS Module</footer>
+    <div class="ov" id="ov">
+      <div class="t">It's your turn!</div>
+      <p>Please go in for your viva now.</p>
+      <button class="btn sm sec" onclick="dismissOv()">Dismiss</button>
     </div>
+    <div class="mbg" id="modal">
+      <div class="modal">
+        <div class="title" style="font-size:18px">Admin Login</div>
+        <div class="sub" style="margin-bottom:16px">Enter admin password.</div>
+        <input type="password" id="pw" placeholder="••••••••" />
+        <div id="pwMsg"></div>
+        <button class="btn" onclick="adminLogin()">Login</button>
+        <button class="btn sm sec" style="width:100%;margin-top:10px" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+    <div class="topbar">
+      <div class="brand">NIBM <span>iOS Viva</span></div>
+      <div class="right">
+        <div class="clock" id="clock">--:--</div>
+        <button class="btn sm sec" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+      </div>
+    </div>
+    <div class="main">
+      <div id="entry">
+        <div class="wrap">
+          <div class="badge">Live Queue</div>
+          <div class="title">Join the Queue</div>
+          <div class="sub">
+            Enter your submission token when you arrive. Your place in line
+            follows your booked slot.
+          </div>
+          <div class="card">
+            <label for="tok">Submission Token</label>
+            <input id="tok" placeholder="IOS-XXXX" autocomplete="off" spellcheck="false" />
+            <div id="tokMsg"></div>
+            <button class="btn" id="tokBtn" disabled>Join Queue</button>
+          </div>
+        </div>
+      </div>
+      <div id="student" style="display:none;max-width:520px;margin:0 auto">
+        <div class="notif" id="notif" style="display:none">
+          <span>Enable notifications so we can alert you when it's your turn.</span>
+          <button class="btn sm" onclick="askNotif()">Enable</button>
+        </div>
+        <div class="hero">
+          <div class="lbl">Your position</div>
+          <div class="num" id="posNum">—</div>
+          <div id="posSt"></div>
+          <div class="eta" id="posEta"></div>
+        </div>
+        <div class="gh" style="margin-top:0">Queue</div>
+        <div id="sList"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="lbl">Message to examiner</div>
+          <textarea id="sMsg" placeholder="Type a message… visible only to the examiner"></textarea>
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn sm" onclick="sendMsg()">Send</button>
+          </div>
+          <div id="sMsgSt" style="margin-top:8px"></div>
+        </div>
+        <button class="btn sm sec" style="width:100%" onclick="leave()">← Change token</button>
+      </div>
+      <div id="admin" style="display:none">
+        <div class="ahead">
+          <div class="title" style="font-size:22px;margin:0">Admin Panel</div>
+          <div class="tabs" id="dayTabs"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="meta">Slot</span>
+            <select id="slotSel" onchange="slotOv=this.value;adminRender()"></select>
+          </div>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div id="banner"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px" id="callBtns"></div>
+        <div class="tabs" style="margin:16px 0">
+          <button class="tab on" id="tQueue" onclick="aTab('queue')">Queue</button>
+          <button class="tab" id="tMsgs" onclick="aTab('msgs')">Messages <span id="unread"></span></button>
+          <button class="tab" id="tAdd" onclick="aTab('add')">Add Student</button>
+        </div>
+        <div id="pQueue"></div>
+        <div id="pMsgs" style="display:none"></div>
+        <div id="pAdd" style="display:none">
+          <div class="card">
+            <div class="lbl">Add student to queue</div>
+            <input id="addTok" placeholder="IOS-XXXX" />
+            <input id="addNm" placeholder="Full name" />
+            <div id="addMsg"></div>
+            <button class="btn" onclick="addStudent()">Add to Queue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>© NM Fuzail 2026 · NIBM iOS Module</footer>
     <script>
-      const SUPABASE_URL = "https://shfvfibjwqkjqfsmbbax.supabase.co";
-      const SUPABASE_ANON = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
-      const QUEUE_PAGE = "./queue.html";
-      // Internal keys stay 'sat' / 'sun' so existing Supabase rows keep working.
-      // 'sat' = 24 Oct (non-lab only), 'sun' = 31 Oct (lab + non-lab).
-      const SAT_DATE = "Sat 24 Oct 2026";
-      const SUN_DATE = "Sat 31 Oct 2026";
-
-      const db = (path, opts = {}) =>
-        fetch(SUPABASE_URL + "/rest/v1/" + path, {
-          headers: {
-            apikey: SUPABASE_ANON,
-            Authorization: "Bearer " + SUPABASE_ANON,
-            "Content-Type": "application/json",
-            Prefer: "return=representation",
-            ...opts.headers,
-          },
-          ...opts,
-        }).then((r) => r.json());
-      let state = {
-        step: 1,
-        token: "",
-        studentName: "",
-        studentIndex: "",
-        day: null,
-        isLab: false,
-        sessions: [],
-        selectedHour: null,
+      const SB = "https://shfvfibjwqkjqfsmbbax.supabase.co";
+      const KEY = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
+      const TZ = 330; // IST
+      const BOOK_PAGE = "./book.html";
+      const POLL = 5000;
+      const SESSION_MIN = 10; // minutes per viva
+      const ENFORCE_DAY = true; // students can only join on their booked date (false = test any day)
+      // 'sat' = 24 Oct (non-lab), 'sun' = 31 Oct (lab)
+      const DAYS = {
+        sat: { label: "Sat 24 Oct", date: "2026-10-24" },
+        sun: { label: "Sat 31 Oct", date: "2026-10-31" },
       };
-      document.getElementById("satDate").textContent = SAT_DATE;
-      document.getElementById("sunDate").textContent = SUN_DATE;
-      const tokenInput = document.getElementById("tokenInput");
-      tokenInput.addEventListener("input", () => {
-        const v = tokenInput.value.trim().toUpperCase();
-        tokenInput.value = v;
-        document.getElementById("tokenBtn").disabled = v.length < 4;
-        document.getElementById("tokenHint").classList.remove("show");
-        document.getElementById("tokenOk").classList.remove("show");
-        document.getElementById("bookedBanner").style.display = "none";
-        tokenInput.classList.remove("invalid", "valid");
-      });
-      tokenInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") document.getElementById("tokenBtn").click();
-      });
-      function goToStep(n) {
-        state.step = n;
-        ["step1Card", "step2Card", "step3Card", "step4Card"].forEach(
-          (id, i) => {
-            document.getElementById(id).style.display =
-              i + 1 === n ? "" : "none";
-          },
-        );
-        document.getElementById("successScreen").classList.remove("show");
-        if (n === 2) onLabChange();
-        updateStepsNav(n);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) =>
+        String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      async function api(path, method, body, prefer) {
+        const h = { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" };
+        if (prefer) h.Prefer = prefer;
+        const r = await fetch(SB + "/rest/v1/" + path, { method: method || "GET", headers: h, body: body ? JSON.stringify(body) : undefined });
+        const t = await r.text();
+        let j = null;
+        try {
+          j = t ? JSON.parse(t) : null;
+        } catch (_) {
+          j = t;
+        }
+        if (!r.ok) throw new Error((j && j.message) || t || r.status);
+        return j;
       }
-      function updateStepsNav(n) {
-        [1, 2, 3, 4].forEach((i) => {
-          const el = document.getElementById("snav" + i);
-          el.classList.remove("active", "done");
-          if (i < n) el.classList.add("done");
-          else if (i === n) el.classList.add("active");
+      const get = (p) => api(p);
+      const patch = (p, b) => api(p, "PATCH", b, "return=minimal");
+      const post = (p, b, pref) => api(p, "POST", b, pref || "return=minimal");
+      const store = {
+        get: (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } },
+        set: (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} },
+        del: (k) => { try { localStorage.removeItem(k); } catch (_) {} },
+      };
+      function nowIST() {
+        const n = new Date();
+        return new Date(n.getTime() + (TZ + n.getTimezoneOffset()) * 60000);
+      }
+      function fmtTime(d) {
+        let h = d.getHours();
+        const m = d.getMinutes(), ap = h >= 12 ? "PM" : "AM";
+        h = h % 12 || 12;
+        return h + ":" + String(m).padStart(2, "0") + " " + ap;
+      }
+      const fmtHour = (h) => (h % 12 || 12) + ":00 " + (h >= 12 && h < 24 ? "PM" : "AM");
+      const slotLbl = (h) => (h === 99 ? "Walk-in" : fmtHour(h) + " – " + fmtHour(h + 1));
+      function todayKey() {
+        const n = nowIST(),
+          d = n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0") + "-" + String(n.getDate()).padStart(2, "0");
+        return Object.keys(DAYS).find((k) => DAYS[k].date === d) || null;
+      }
+      const tick = () => ($("clock").textContent = fmtTime(nowIST()) + " IST");
+      tick();
+      setInterval(tick, 1000);
+
+      // ---- queue helpers: order = booked slot, then arrival order ----
+      async function loadQueue(day) {
+        const [q, b] = await Promise.all([
+          get("queue?day=eq." + day + "&order=position.asc&select=*"),
+          get("bookings?day=eq." + day + "&select=token,hour_start"),
+        ]);
+        const H = {};
+        b.forEach((x) => (H[x.token] = x.hour_start));
+        q.forEach((r) => (r.hour = H[r.token] ?? 99));
+        return q;
+      }
+      const isCalled = (r) => r.status === "called" || r.status === "active";
+      const byQ = (a, b) => a.hour - b.hour || a.position - b.position;
+
+      /* ================= STUDENT ================= */
+      var S = { token: null, name: "", day: null, timer: null, dismissed: false, lastKey: "", notif: false };
+      const LS = "viva_token";
+      const tok = $("tok");
+      tok.oninput = () => {
+        tok.value = tok.value.trim().toUpperCase();
+        $("tokBtn").disabled = tok.value.length < 4;
+        tok.classList.remove("bad");
+        $("tokMsg").innerHTML = "";
+      };
+      tok.onkeydown = (e) => e.key === "Enter" && !$("tokBtn").disabled && $("tokBtn").click();
+      $("tokBtn").onclick = () => enterQueue();
+      const tmsg = (html, cls) => ($("tokMsg").innerHTML = '<div class="msg ' + (cls || "") + '">' + html + "</div>");
+
+      async function enterQueue(saved) {
+        const token = (saved || tok.value).trim().toUpperCase(), enc = encodeURIComponent(token);
+        const btn = $("tokBtn");
+        btn.disabled = true;
+        btn.textContent = "Checking…";
+        try {
+          const sub = await get("ios_submissions?submission_code=eq." + enc + "&select=student_name");
+          if (!sub.length) {
+            tok.classList.add("bad");
+            return tmsg("Token not found.");
+          }
+          const bk = await get("bookings?token=eq." + enc + "&select=day,hour_start");
+          if (!bk.length)
+            return tmsg('No slot booked. <a href="' + BOOK_PAGE + '" style="color:var(--ac2)">Book first →</a>', "w");
+          if (ENFORCE_DAY && todayKey() !== bk[0].day)
+            return tmsg("Your viva is on <strong>" + DAYS[bk[0].day].label + "</strong>. You can join the queue on that day.", "w");
+          S.token = token;
+          S.name = sub[0].student_name || token;
+          S.day = bk[0].day;
+          const ex = await get("queue?day=eq." + S.day + "&token=eq." + enc + "&select=id");
+          if (!ex.length) {
+            const mx = await get("queue?day=eq." + S.day + "&select=position&order=position.desc&limit=1");
+            await post("queue", { day: S.day, token, student_name: S.name, position: (mx[0] ? mx[0].position : 0) + 1, status: "waiting" });
+          }
+          store.set(LS, token);
+          showStudent();
+        } catch (e) {
+          tmsg("Error: " + esc(e.message));
+        } finally {
+          btn.textContent = "Join Queue";
+          btn.disabled = tok.value.length < 4;
+        }
+      }
+      function showStudent() {
+        $("entry").style.display = "none";
+        $("student").style.display = "";
+        if (window.Notification && Notification.permission === "default") $("notif").style.display = "";
+        S.notif = !!window.Notification && Notification.permission === "granted";
+        loadMsg();
+        studentPoll();
+        clearInterval(S.timer);
+        S.timer = setInterval(studentPoll, POLL);
+      }
+      function leave() {
+        clearInterval(S.timer);
+        S.token = null;
+        store.del(LS);
+        $("student").style.display = "none";
+        $("entry").style.display = "";
+        tok.value = "";
+        $("tokBtn").disabled = true;
+      }
+      async function studentPoll() {
+        if (!S.token) return;
+        try {
+          const q = await loadQueue(S.day),
+            me = q.find((r) => r.token === S.token);
+          if (!me) {
+            leave();
+            return tmsg("You were removed from the queue. Enter your token to rejoin.", "w");
+          }
+          const W = q.filter((r) => r.status === "waiting").sort(byQ),
+            C = q.filter(isCalled),
+            idx = W.findIndex((r) => r.token === S.token);
+          hero(me, idx, C.length);
+          list(W, C, me);
+          const called = isCalled(me);
+          if (!called) S.dismissed = false;
+          if (called && !S.dismissed) {
+            $("ov").classList.add("show");
+            alertTurn(me);
+          }
+          notify(me, idx, called);
+        } catch (e) {}
+      }
+      function hero(me, idx, calledCount) {
+        const n = $("posNum"), st = $("posSt"), eta = $("posEta");
+        if (me.status === "done") {
+          n.textContent = "✓";
+          n.className = "num p1";
+          st.innerHTML = '<span class="st done">Done — thank you</span>';
+          eta.textContent = "";
+        } else if (isCalled(me)) {
+          n.textContent = "!";
+          n.className = "num p1";
+          st.innerHTML = '<span class="st called">You\'re being called!</span>';
+          eta.textContent = "Please go in now";
+        } else {
+          const p = idx + 1;
+          n.textContent = p;
+          n.className = "num" + (p === 1 ? " p1" : p === 2 ? " p2" : "");
+          st.innerHTML = '<span class="st">In queue · slot ' + slotLbl(me.hour) + "</span>";
+          eta.textContent = idx === 0 && !calledCount ? "You are next!" : "~" + (idx + calledCount) * SESSION_MIN + " min wait";
+        }
+      }
+      function maskName(n) {
+        if (!n) return "—";
+        return n.trim().split(" ").map((w, i) => (i === 0 ? w : w[0] + ".")).join(" ");
+      }
+      function list(W, C, me) {
+        const el = $("sList");
+        if (!W.length && !C.length) return (el.innerHTML = '<div class="meta" style="text-align:center;padding:14px">Queue is empty</div>');
+        const row = (r, rn, cls) =>
+          '<div class="row ' + (r.token === S.token ? "me " : "") + cls + '"><div class="rn">' + rn + '</div><div class="ri"><b>' +
+          (r.token === S.token ? "You" : esc(maskName(r.student_name))) + '</b><div class="meta">' + slotLbl(r.hour) + "</div></div>" +
+          (cls === "called" ? '<span class="tag a">in room</span>' : "") + "</div>";
+        el.innerHTML = C.map((r) => row(r, "▶", "called")).join("") + W.map((r, i) => row(r, i + 1, "")).join("");
+      }
+      function dismissOv() {
+        S.dismissed = true;
+        $("ov").classList.remove("show");
+      }
+      let alerted = false;
+      function alertTurn(me) {
+        if (alerted) return;
+        alerted = true;
+        try { navigator.vibrate && navigator.vibrate([300, 150, 300, 150, 300]); } catch (_) {}
+        try {
+          const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator();
+          o.connect(c.destination);
+          o.frequency.value = 880;
+          o.start();
+          o.stop(c.currentTime + 0.5);
+        } catch (_) {}
+      }
+      function notify(me, idx, called) {
+        if (!called) alerted = false;
+        if (!S.notif || !window.Notification || Notification.permission !== "granted") return;
+        const key = called ? "called" : idx === 0 ? "next" : idx === 1 ? "second" : "";
+        if (key === S.lastKey) return;
+        S.lastKey = key;
+        if (key === "called") new Notification("🎓 It's your turn!", { body: "Please go in for your viva." });
+        else if (key === "next") new Notification("🔔 You are next!", { body: "Get ready — the examiner will call you shortly." });
+        else if (key === "second") new Notification("⏳ Almost up", { body: "One student ahead of you." });
+      }
+      function askNotif() {
+        Notification.requestPermission().then((p) => {
+          if (p === "granted") {
+            S.notif = true;
+            $("notif").style.display = "none";
+          }
         });
       }
-      async function verifyToken() {
-        const token = tokenInput.value.trim().toUpperCase();
-        const btn = document.getElementById("tokenBtn");
-        const spinner = document.getElementById("tokenSpinner");
-        const txt = document.getElementById("tokenBtnTxt");
-        const hint = document.getElementById("tokenHint");
-        const okHint = document.getElementById("tokenOk");
-        const msgBox = document.getElementById("tokenMsg");
-        btn.disabled = true;
-        spinner.style.display = "";
-        txt.textContent = "Verifying…";
-        hint.classList.remove("show");
-        okHint.classList.remove("show");
-        msgBox.className = "msg-box";
-        msgBox.style.display = "none";
-        document.getElementById("bookedBanner").style.display = "none";
+      async function loadMsg() {
         try {
-          const sub = await db(
-            "ios_submissions?submission_code=eq." +
-              encodeURIComponent(token) +
-              "&select=submission_code,student_name,student_index",
-          );
-          if (!Array.isArray(sub)) {
-            console.error("Supabase error response:", sub);
-          }
-          if (!Array.isArray(sub) || sub.length === 0) {
-            tokenInput.classList.add("invalid");
-            hint.textContent = Array.isArray(sub)
-              ? "Token not found. Check your submission acknowledgement."
-              : "Server error — check console for details (likely a Supabase RLS policy issue).";
-            hint.classList.add("show");
-            btn.disabled = false;
-            spinner.style.display = "none";
-            txt.textContent = "Verify Token";
-            return;
-          }
-          state.token = token;
-          state.studentName = sub[0].student_name || "";
-          state.studentIndex = sub[0].student_index || "";
-          const existing = await db(
-            "bookings?token=eq." +
-              encodeURIComponent(token) +
-              "&select=day,hour_start",
-          );
-          if (Array.isArray(existing) && existing.length > 0) {
-            const b = existing[0];
-            const banner = document.getElementById("bookedBanner");
-            banner.innerHTML =
-              "<strong>You have already booked a slot.</strong><br>" +
-              (b.day === "sat" ? SAT_DATE : SUN_DATE) +
-              " · " +
-              fmt(b.hour_start) +
-              " – " +
-              fmt(b.hour_start + 1) +
-              "<br>You can't book again. Please go to the queue page during your window." +
-              '<a class="queue-link" href="' +
-              QUEUE_PAGE +
-              '">Go to queue page →</a>';
-            banner.style.display = "block";
-            tokenInput.classList.add("invalid");
-            btn.disabled = false;
-            spinner.style.display = "none";
-            txt.textContent = "Verify Token";
-            return;
-          }
-          tokenInput.classList.add("valid");
-          okHint.textContent = "Verified — " + state.studentName;
-          okHint.classList.add("show");
-          setTimeout(() => goToStep(2), 400);
-        } catch (e) {
-          msgBox.textContent = "Network error — please try again.";
-          msgBox.className = "msg-box err show";
-          btn.disabled = false;
-          spinner.style.display = "none";
-          txt.textContent = "Verify Token";
-        }
+          const m = await get("messages?token=eq." + encodeURIComponent(S.token) + "&select=message");
+          if (m.length && m[0].message) $("sMsg").value = m[0].message;
+        } catch (_) {}
       }
-      document
-        .getElementById("tokenBtn")
-        .addEventListener("click", verifyToken);
-      // 'sat' (24 Oct) = non-lab only, 'sun' (31 Oct) = lab only
-      function requiredDay() {
-        return state.isLab ? "sun" : "sat";
-      }
-      function selectDay(day) {
-        // date is fixed by lab status; ignore clicks on the other card
-        if (day !== requiredDay()) return;
-        state.day = day;
-        state.selectedHour = null;
-        document
-          .getElementById("daySat")
-          .classList.remove("selected-sat", "selected-sun");
-        document
-          .getElementById("daySun")
-          .classList.remove("selected-sat", "selected-sun");
-        document
-          .getElementById(day === "sat" ? "daySat" : "daySun")
-          .classList.add("selected-" + day);
-        document.getElementById("dayBtn").disabled = false;
-      }
-      function onLabChange() {
-        state.isLab = document.getElementById("labCheck").checked;
-        const satCard = document.getElementById("daySat");
-        const sunCard = document.getElementById("daySun");
-        satCard.classList.toggle("disabled", state.isLab);
-        sunCard.classList.toggle("disabled", !state.isLab);
-        selectDay(requiredDay());
-      }
-      async function goToStep3() {
-        state.isLab = document.getElementById("labCheck").checked;
-        state.day = requiredDay();
+      async function sendMsg() {
+        const t = $("sMsg").value.trim(), st = $("sMsgSt");
+        if (!t) return;
         try {
-          const sess = await db(
-            "sessions?day=eq." + state.day + "&order=hour_start.asc",
-          );
-          if (!Array.isArray(sess)) {
-            console.error("Sessions query error:", sess);
-          }
-          state.sessions = Array.isArray(sess) ? sess : [];
-          const counts = await db(
-            "bookings?day=eq." + state.day + "&select=hour_start",
-          );
-          state.bookingCounts = {};
-          if (Array.isArray(counts)) {
-            counts.forEach((b) => {
-              state.bookingCounts[b.hour_start] =
-                (state.bookingCounts[b.hour_start] || 0) + 1;
-            });
-          }
-          renderSlots();
-          goToStep(3);
+          await post("messages", { token: S.token, message: t, updated_at: new Date().toISOString(), read: false }, "resolution=merge-duplicates,return=minimal");
+          st.innerHTML = '<div class="msg g">Sent ✓</div>';
         } catch (e) {
-          alert("Could not load sessions. Please try again.");
+          st.innerHTML = '<div class="msg">Failed: ' + esc(e.message) + "</div>";
         }
+        setTimeout(() => (st.innerHTML = ""), 2500);
       }
-      function fmt(h) {
-        if (h >= 24) return "12:00 AM";
-        if (h === 12) return "12:00 PM";
-        return h > 12 ? h - 12 + ":00 PM" : h + ":00 AM";
-      }
-      function renderSlots() {
-        const grid = document.getElementById("slotsGrid");
-        grid.innerHTML = "";
-        state.selectedHour = null;
-        document.getElementById("slotBtn").disabled = true;
-        if (state.sessions.length === 0) {
-          grid.innerHTML =
-            '<div class="msg-box err show" style="grid-column:1/-1;margin:0">No slots found for this day. Please contact your lecturer. (Open the browser console for details.)</div>';
+
+      /* ================= ADMIN ================= */
+      var A = { on: false, day: todayKey() || "sat", tab: "queue", timer: null, q: [] };
+      var slotOv = "auto";
+      function toggleAdmin() {
+        if (A.on) {
+          A.on = false;
+          clearInterval(A.timer);
+          $("admin").style.display = "none";
+          $("adminBtn").classList.remove("on");
+          $(S.token ? "student" : "entry").style.display = "";
           return;
         }
-        state.sessions.forEach((s) => {
-          const isEvening = s.hour_start >= 19;
-          const labBlocked = state.isLab && isEvening;
-          const count = state.bookingCounts[s.hour_start] || 0;
-          const remaining = s.capacity - count;
-          const isBlocked = s.blocked || labBlocked;
-          const isFull = remaining <= 0;
-          const el = document.createElement("div");
-          el.className =
-            "slot-btn" +
-            (isBlocked ? " blocked" : "") +
-            (isFull && !isBlocked ? " full" : "");
-          let pipClass = "slot-pip";
-          let metaText = "";
-          if (isBlocked) {
-            metaText = s.blocked
-              ? s.hour_start === 12
-                ? "Break"
-                : "No session"
-              : "Lab unavailable";
-            pipClass += " err";
-          } else if (isFull) {
-            metaText = "Full";
-            pipClass += " err";
-          } else if (remaining <= 2) {
-            metaText =
-              remaining + " spot" + (remaining === 1 ? "" : "s") + " left";
-            pipClass += " warn";
-          } else {
-            metaText =
-              remaining + " spot" + (remaining === 1 ? "" : "s") + " left";
-          }
-          el.innerHTML =
-            '<div class="slot-time">' +
-            fmt(s.hour_start) +
-            " – " +
-            fmt(s.hour_end) +
-            '</div><div class="slot-meta"><span class="' +
-            pipClass +
-            '"></span>' +
-            metaText +
-            "</div>";
-          if (!isBlocked && !isFull) {
-            el.addEventListener("click", () => selectSlot(s.hour_start, el));
-          }
-          grid.appendChild(el);
-        });
+        $("modal").classList.add("show");
+        setTimeout(() => $("pw").focus(), 100);
       }
-      function selectSlot(hour, el) {
-        document
-          .querySelectorAll(".slot-btn")
-          .forEach((b) => b.classList.remove("selected"));
-        el.classList.add("selected");
-        state.selectedHour = hour;
-        document.getElementById("slotBtn").disabled = false;
+      function closeModal() {
+        $("modal").classList.remove("show");
+        $("pw").value = "";
+        $("pwMsg").innerHTML = "";
       }
-      function goToStep4() {
-        const s = state;
-        document.getElementById("confirmDetail").innerHTML =
-          '<div class="success-detail-row"><span class="lbl">Student</span><span class="val">' +
-          s.studentName +
-          '</span></div><div class="success-detail-row"><span class="lbl">Index No</span><span class="val">' +
-          s.studentIndex +
-          '</span></div><div class="success-detail-row"><span class="lbl">Token</span><span class="val">' +
-          s.token +
-          '</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">' +
-          (s.day === "sat" ? SAT_DATE : SUN_DATE) +
-          '</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">' +
-          fmt(s.selectedHour) +
-          " – " +
-          fmt(s.selectedHour + 1) +
-          '</span></div><div class="success-detail-row"><span class="lbl">Lab computer</span><span class="val">' +
-          (s.isLab ? "Yes" : "No") +
-          "</span></div>";
-        goToStep(4);
-      }
-      async function submitBooking() {
-        const btn = document.getElementById("confirmBtn");
-        const spinner = document.getElementById("confirmSpinner");
-        const txt = document.getElementById("confirmBtnTxt");
-        const msgBox = document.getElementById("confirmMsg");
-        btn.disabled = true;
-        spinner.style.display = "";
-        txt.textContent = "Booking…";
-        msgBox.className = "msg-box";
-        const s = state;
+      $("pw").onkeydown = (e) => e.key === "Enter" && adminLogin();
+      async function adminLogin() {
         try {
-          if (s.day !== requiredDay()) {
-            msgBox.textContent =
-              "Lab students book Sat 31 Oct and others book Sat 24 Oct. Please go back and check your lab selection.";
-            msgBox.className = "msg-box err show";
-            btn.disabled = false;
-            spinner.style.display = "none";
-            txt.textContent = "Confirm Booking";
-            return;
-          }
-          const chk = await db(
-            "bookings?token=eq." + encodeURIComponent(s.token) + "&select=id",
-          );
-          if (Array.isArray(chk) && chk.length > 0) {
-            msgBox.textContent = "You already have a booking.";
-            msgBox.className = "msg-box err show";
-            btn.disabled = false;
-            spinner.style.display = "none";
-            txt.textContent = "Confirm Booking";
-            return;
-          }
-          const counts = await db(
-            "bookings?day=eq." +
-              s.day +
-              "&hour_start=eq." +
-              s.selectedHour +
-              "&select=id",
-          );
-          const session = s.sessions.find(
-            (x) => x.hour_start === s.selectedHour,
-          );
-          if (Array.isArray(counts) && counts.length >= session.capacity) {
-            msgBox.textContent =
-              "This slot just filled up. Please go back and choose another.";
-            msgBox.className = "msg-box err show";
-            btn.disabled = false;
-            spinner.style.display = "none";
-            txt.textContent = "Confirm Booking";
-            return;
-          }
-          const res = await fetch(SUPABASE_URL + "/rest/v1/bookings", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              apikey: SUPABASE_ANON,
-              Authorization: "Bearer " + SUPABASE_ANON,
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify({
-              token: s.token,
-              student_name: s.studentName,
-              student_index: s.studentIndex,
-              day: s.day,
-              hour_start: s.selectedHour,
-              is_lab_computer: s.isLab,
-            }),
-          });
-          if (!res.ok) {
-            const raw = await res.text();
-            let m = raw;
-            try {
-              m = JSON.parse(raw).message || raw;
-            } catch (_) {}
-            if (/full/i.test(m)) {
-              throw new Error(
-                "This slot just filled up. Please go back and choose another.",
-              );
-            } else if (/not available|No session/i.test(m)) {
-              throw new Error(
-                "This slot is not available. Please go back and choose another.",
-              );
-            } else if (/bookings_lab_day_check/.test(m)) {
-              throw new Error(
-                "Lab students book Sat 31 Oct and others book Sat 24 Oct.",
-              );
-            } else if (/bookings_token_key|duplicate key/i.test(m)) {
-              throw new Error("You already have a booking.");
-            }
-            throw new Error(m);
-          }
-          showSuccess();
+          const cfg = await get("config?key=eq.admin_password&select=value");
+          if (!cfg.length) throw new Error("Config not found");
+          if ($("pw").value !== cfg[0].value) return ($("pwMsg").innerHTML = '<div class="msg">Incorrect password.</div>');
+          A.on = true;
+          closeModal();
+          $("entry").style.display = "none";
+          $("student").style.display = "none";
+          $("admin").style.display = "";
+          $("slotSel").innerHTML =
+            '<option value="auto">Auto (clock)</option>' +
+            [9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((h) => '<option value="' + h + '">' + slotLbl(h) + "</option>").join("");
+          dayTabs();
+          adminRefresh();
+          clearInterval(A.timer);
+          A.timer = setInterval(adminRefresh, POLL);
         } catch (e) {
-          msgBox.textContent = e.message;
-          msgBox.className = "msg-box err show";
-          btn.disabled = false;
-          spinner.style.display = "none";
-          txt.textContent = "Confirm Booking";
+          $("pwMsg").innerHTML = '<div class="msg">Error: ' + esc(e.message) + "</div>";
         }
       }
-      function showSuccess() {
-        const s = state;
-        ["step1Card", "step2Card", "step3Card", "step4Card"].forEach((id) => {
-          document.getElementById(id).style.display = "none";
-        });
-        document.getElementById("stepsNav").style.display = "none";
-        document.getElementById("successDetail").innerHTML =
-          '<div class="success-detail-row"><span class="lbl">Token</span><span class="val">' +
-          s.token +
-          '</span></div><div class="success-detail-row"><span class="lbl">Day</span><span class="val">' +
-          (s.day === "sat" ? SAT_DATE : SUN_DATE) +
-          '</span></div><div class="success-detail-row"><span class="lbl">Window</span><span class="val">' +
-          fmt(s.selectedHour) +
-          " – " +
-          fmt(s.selectedHour + 1) +
-          "</span></div>";
-        document.getElementById("successNote").innerHTML =
-          'Return to <a href="' +
-          QUEUE_PAGE +
-          '" style="color:var(--accent2)">the queue page</a> during your window and join the queue. <strong>Enable browser notifications</strong> when prompted so you know when it\u2019s your turn.';
-        document.getElementById("successScreen").classList.add("show");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      function dayTabs() {
+        $("dayTabs").innerHTML = Object.keys(DAYS)
+          .map((k) => '<button class="tab ' + (k === A.day ? "on" : "") + '" onclick="setDay(\'' + k + "')\">" + DAYS[k].label + "</button>")
+          .join("");
       }
+      function setDay(d) {
+        A.day = d;
+        dayTabs();
+        adminRefresh();
+      }
+      function aTab(t) {
+        A.tab = t;
+        [["queue", "Queue"], ["msgs", "Msgs"], ["add", "Add"]].forEach(([k, n]) => {
+          $("t" + n).classList.toggle("on", k === t);
+          $("p" + n).style.display = k === t ? "" : "none";
+        });
+        if (t === "msgs") loadMsgs();
+      }
+      async function adminRefresh() {
+        if (!A.on) return;
+        try {
+          A.q = await loadQueue(A.day);
+          adminRender();
+          if (A.tab === "msgs") loadMsgs();
+        } catch (_) {}
+      }
+      async function act(id, status) {
+        const b = { status };
+        if (status === "called") b.called_at = new Date().toISOString();
+        if (status === "done") b.done_at = new Date().toISOString();
+        try {
+          await patch("queue?id=eq." + id, b);
+          adminRefresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      async function removeRow(id) {
+        if (!confirm("Remove this student from the queue?")) return;
+        try {
+          await api("queue?id=eq." + id, "DELETE");
+          adminRefresh();
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      function adminRender() {
+        const now = nowIST(),
+          h = slotOv === "auto" ? now.getHours() : +slotOv,
+          left = h === now.getHours() ? 60 - now.getMinutes() : 60;
+        const W = A.q.filter((r) => r.status === "waiting").sort(byQ),
+          C = A.q.filter(isCalled),
+          F = A.q.filter((r) => r.status === "done");
+        const cur = W.filter((r) => r.hour <= h),
+          later = W.filter((r) => r.hour > h),
+          room = Math.floor(left / SESSION_MIN) - cur.length - C.length;
+        $("stats").innerHTML = [["Waiting", W.length], ["In room", C.length], ["Done", F.length], ["Total", A.q.length]]
+          .map(([l, n]) => '<div class="stat"><b>' + n + "</b><span>" + l + "</span></div>").join("");
+        $("banner").innerHTML =
+          later.length && room > 0
+            ? '<div class="banner go"><b>⏱ ' + left + " min left in this slot — room for " + room + " more.</b> " + later.length +
+              " student" + (later.length === 1 ? " is" : "s are") + " waiting from upcoming slots. Use “Pull in from next slot”.</div>"
+            : '<div class="banner">' + left + " min left in the " + slotLbl(h) + " slot · " + cur.length + " waiting from this slot or earlier" +
+              (later.length ? " · " + later.length + " from later slots" : "") + ".</div>";
+        $("callBtns").innerHTML =
+          '<button class="btn ok" ' + (cur.length ? "" : "disabled") + ' onclick="act(' + (cur[0] ? cur[0].id : 0) + ',\'called\')">Call next in this slot</button>' +
+          '<button class="btn warn" ' + (later.length ? "" : "disabled") + ' onclick="act(' + (later[0] ? later[0].id : 0) + ',\'called\')">Pull in from next slot</button>';
+        const btn = (t, cls, fn) => '<button class="ab ' + cls + '" onclick="' + fn + '">' + t + "</button>";
+        const row = (r, rn, btns, cls) =>
+          '<div class="row ' + (cls || "") + '"><div class="rn">' + rn + '</div><div class="ri"><b>' + esc(r.student_name || r.token) +
+          '</b> <span class="mono">' + esc(r.token) + "</span>" +
+          (r.status === "waiting" && r.hour < h ? '<span class="tag">overdue</span>' : "") +
+          (isCalled(r) && r.hour > h ? '<span class="tag a">early</span>' : "") +
+          '<div class="meta">Slot ' + slotLbl(r.hour) + '</div></div><div class="ra">' + btns + "</div></div>";
+        let n = 0;
+        const groups = {};
+        W.forEach((r) => (groups[r.hour] = groups[r.hour] || []).push(r));
+        const waitingHtml = Object.keys(groups).map(Number).sort((a, b) => a - b).map((hr) =>
+          '<div class="gh">' + slotLbl(hr) + (hr === h ? " · current" : hr < h ? " · earlier" : "") + "</div>" +
+          groups[hr].map((r) => row(r, ++n, btn("Call", "call", "act(" + r.id + ",'called')") + btn("✕", "rm", "removeRow(" + r.id + ")"))).join("")
+        ).join("");
+        $("pQueue").innerHTML =
+          (C.length
+            ? '<div class="gh" style="margin-top:0">In the room</div>' +
+              C.map((r) => row(r, "▶", btn("Done", "dn", "act(" + r.id + ",'done')") + btn("Back", "bk", "act(" + r.id + ",'waiting')") + btn("✕", "rm", "removeRow(" + r.id + ")"), "called")).join("")
+            : "") +
+          (waitingHtml || '<div class="meta" style="text-align:center;padding:20px">Nobody is waiting.</div>') +
+          (F.length
+            ? '<div class="gh">Finished</div>' +
+              F.slice(-8).reverse().map((r) => row(r, "✓", btn("Undo", "bk", "act(" + r.id + ",'waiting')"), "done")).join("")
+            : "");
+      }
+      async function loadMsgs() {
+        try {
+          const m = await get("messages?order=updated_at.desc&select=*"),
+            un = m.filter((x) => !x.read).length;
+          $("unread").textContent = un ? " (" + un + ")" : "";
+          $("pMsgs").innerHTML = m.length
+            ? m.map((x) =>
+                '<div class="mi ' + (x.read ? "" : "un") + '" onclick="markRead(\'' + esc(x.token) + '\')"><div style="display:flex;justify-content:space-between"><b>' +
+                esc(x.token) + '</b><span class="meta">' + fmtTime(new Date(x.updated_at)) + '</span></div><div class="meta" style="margin-top:4px">' + esc(x.message || "—") + "</div></div>"
+              ).join("")
+            : '<div class="meta" style="text-align:center;padding:20px">No messages</div>';
+        } catch (_) {}
+      }
+      async function markRead(t) {
+        try {
+          await patch("messages?token=eq." + encodeURIComponent(t), { read: true });
+          loadMsgs();
+        } catch (_) {}
+      }
+      async function addStudent() {
+        const token = $("addTok").value.trim().toUpperCase(), name = $("addNm").value.trim(), m = $("addMsg");
+        if (!token || !name) return (m.innerHTML = '<div class="msg">Token and name required.</div>');
+        try {
+          const ex = await get("queue?day=eq." + A.day + "&token=eq." + encodeURIComponent(token) + "&select=id");
+          if (ex.length) return (m.innerHTML = '<div class="msg w">Already in queue.</div>');
+          const mx = await get("queue?day=eq." + A.day + "&select=position&order=position.desc&limit=1");
+          await post("queue", { day: A.day, token, student_name: name, position: (mx[0] ? mx[0].position : 0) + 1, status: "waiting" });
+          m.innerHTML = '<div class="msg g">' + esc(name) + " added to " + DAYS[A.day].label + ".</div>";
+          $("addTok").value = $("addNm").value = "";
+          adminRefresh();
+        } catch (e) {
+          m.innerHTML = '<div class="msg">Error: ' + esc(e.message) + "</div>";
+        }
+      }
+
+      // resume a student's session after a reload
+      const saved = store.get(LS);
+      if (saved) enterQueue(saved);
     </script>
   </body>
 </html>
