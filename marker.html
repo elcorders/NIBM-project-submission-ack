@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CW Marker — NIBM iOS</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #080b12;
+        --s: #0e1220;
+        --s2: #141929;
+        --b: #1e2740;
+        --b2: #2a3555;
+        --ink: #dde3f0;
+        --m: #5a6480;
+        --m2: #8490b0;
+        --ac: #4f8ef7;
+        --ac2: #7eb0ff;
+        --ok: #34d399;
+        --err: #f87171;
+        --warn: #fbbf24;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.55 "DM Sans", sans-serif;
+        min-height: 100vh;
+      }
+      .wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 20px 16px 90px;
+      }
+      h1 {
+        font: 800 26px/1.1 "Syne", sans-serif;
+        letter-spacing: -0.03em;
+        margin-bottom: 6px;
+      }
+      .sub {
+        color: var(--m2);
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .card {
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      input[type="text"],
+      input[type="password"],
+      textarea {
+        width: 100%;
+        padding: 11px 14px;
+        background: var(--s2);
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        color: var(--ink);
+        font: 500 14px/1.5 "DM Sans", sans-serif;
+        outline: none;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 76px;
+      }
+      input:focus,
+      textarea:focus {
+        border-color: var(--ac);
+      }
+      .btn {
+        padding: 11px 18px;
+        background: var(--ac);
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        font: 700 13px/1 "Syne", sans-serif;
+        cursor: pointer;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+      }
+      .btn.g {
+        background: var(--s2);
+        border: 1px solid var(--b);
+        color: var(--m2);
+      }
+      .btn.ok {
+        background: var(--ok);
+        color: #052e1f;
+      }
+      .btn.sm {
+        padding: 7px 11px;
+        font-size: 12px;
+      }
+      .msg {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+        color: #fca5a5;
+        border-radius: 9px;
+        padding: 9px 13px;
+        font-size: 13px;
+        margin: 10px 0;
+      }
+      .lbl {
+        font: 600 11px/1 "IBM Plex Mono", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--m2);
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sp {
+        flex: 1;
+      }
+      /* picker */
+      .stu {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        background: var(--s);
+        border: 1px solid var(--b);
+        border-radius: 10px;
+        margin-bottom: 6px;
+        cursor: pointer;
+      }
+      .stu:hover {
+        border-color: var(--b2);
+      }
+      .mono {
+        font: 12px "IBM Plex Mono", monospace;
+        color: var(--m2);
+      }
+      .pill {
+        font: 600 11px "IBM Plex Mono", monospace;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: var(--s2);
+        color: var(--m);
+        border: 1px solid var(--b);
+      }
+      .pill.done {
+        color: var(--ok);
+        border-color: rgba(52, 211, 153, 0.35);
+      }
+      .pill.part {
+        color: var(--warn);
+        border-color: rgba(251, 191, 36, 0.35);
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 10px 0 14px;
+      }
+      .chip {
+        padding: 6px 12px;
+        border: 1.5px solid var(--b);
+        border-radius: 999px;
+        background: var(--s2);
+        color: var(--m2);
+        font: 500 12.5px "DM Sans", sans-serif;
+        cursor: pointer;
+        user-select: none;
+      }
+      .chip.on {
+        border-color: var(--ac);
+        background: rgba(79, 142, 247, 0.14);
+        color: var(--ink);
+      }
+      .chip.p.on {
+        border-color: var(--ok);
+        background: rgba(52, 211, 153, 0.13);
+      }
+      .chip.n.on {
+        border-color: var(--err);
+        background: rgba(248, 113, 113, 0.12);
+      }
+      /* sheet */
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(8, 11, 18, 0.95);
+        border-bottom: 1px solid var(--b);
+        padding: 10px 16px;
+      }
+      .top .in {
+        max-width: 860px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .tot {
+        font: 800 22px/1 "Syne", sans-serif;
+        color: var(--ac2);
+      }
+      .tot small {
+        font: 500 12px "IBM Plex Mono", monospace;
+        color: var(--m2);
+      }
+      .sv {
+        font: 12px "IBM Plex Mono", monospace;
+        color: var(--m2);
+      }
+      .steps {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 16px 0;
+      }
+      .st {
+        flex: 1;
+        min-width: 92px;
+        padding: 9px 8px;
+        text-align: center;
+        border: 1.5px solid var(--b);
+        border-radius: 10px;
+        background: var(--s);
+        color: var(--m2);
+        cursor: pointer;
+        font: 600 12px "DM Sans", sans-serif;
+      }
+      .st b {
+        display: block;
+        font: 700 13px "IBM Plex Mono", monospace;
+        color: var(--ink);
+      }
+      .st.on {
+        border-color: var(--ac);
+        background: rgba(79, 142, 247, 0.1);
+      }
+      .ch {
+        margin-bottom: 14px;
+      }
+      .ch h2 {
+        font: 800 20px/1.2 "Syne", sans-serif;
+        letter-spacing: -0.02em;
+      }
+      .note {
+        font-size: 12.5px;
+        color: var(--warn);
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.25);
+        border-radius: 9px;
+        padding: 9px 12px;
+        margin-top: 10px;
+      }
+      .sc {
+        border-left: 3px solid var(--b2);
+      }
+      .sc.mk {
+        border-left-color: var(--ac);
+      }
+      .sh {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+      .sh b {
+        font: 700 15px/1.3 "Syne", sans-serif;
+      }
+      .rg {
+        width: 100%;
+        accent-color: var(--ac);
+        height: 28px;
+        margin: 4px 0 0;
+      }
+      .tick {
+        display: flex;
+        justify-content: space-between;
+        font: 10px "IBM Plex Mono", monospace;
+        color: var(--m);
+        padding: 0 2px;
+      }
+      .rd {
+        font: 700 15px "IBM Plex Mono", monospace;
+        margin: 10px 0 4px;
+      }
+      .bd {
+        font-size: 13.5px;
+        color: var(--m2);
+        margin-bottom: 8px;
+      }
+      .bd b {
+        font: 700 12px "IBM Plex Mono", monospace;
+        text-transform: uppercase;
+        margin-right: 6px;
+      }
+      .c0 {
+        color: var(--ok);
+      }
+      .c1 {
+        color: var(--ac2);
+      }
+      .c2 {
+        color: var(--warn);
+      }
+      .c3 {
+        color: var(--err);
+      }
+      details {
+        font-size: 12.5px;
+        color: var(--m2);
+        margin-bottom: 10px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--ac2);
+      }
+      details p {
+        margin: 6px 0;
+      }
+      .cbox {
+        background: var(--s2);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        font: 600 13px "IBM Plex Mono", monospace;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      td,
+      th {
+        padding: 8px 6px;
+        border-bottom: 1px solid var(--b);
+        text-align: left;
+      }
+      th {
+        font: 600 11px "IBM Plex Mono", monospace;
+        color: var(--m2);
+        text-transform: uppercase;
+      }
+      td.r,
+      th.r {
+        text-align: right;
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .flag {
+        padding: 10px 14px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+      .flag.bad {
+        background: rgba(248, 113, 113, 0.1);
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        color: #fca5a5;
+      }
+      .flag.good {
+        background: rgba(52, 211, 153, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        color: var(--ok);
+      }
+      .flag.warn {
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        color: var(--warn);
+      }
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const SB = "https://shfvfibjwqkjqfsmbbax.supabase.co";
+      const KEY = "sb_publishable_IkDfMh44KML9mi0mnD-_1g_j0MTPclU";
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) =>
+        String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      async function rpc(fn, a) {
+        const r = await fetch(SB + "/rest/v1/rpc/" + fn, {
+          method: "POST",
+          headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
+          body: JSON.stringify(a),
+        });
+        const t = await r.text();
+        let j = null;
+        try { j = t ? JSON.parse(t) : null; } catch (_) { j = t; }
+        if (!r.ok) throw new Error((j && j.message) || t);
+        return j;
+      }
+
+      /* ===== RUBRIC (from iOS_CW_Marking_Rubric_2026) =====
+         d = [Excellent 9–10, Good 4–8, Bare Minimum 1–3, Not Acceptable 0]
+         k = feedback keywords: "+" positive, "-" negative, none = neutral */
+      const R = [
+        { n: 1, name: "Prototype & MVP Approval", wt: 10, mand: 1, subs: [
+          { name: "Problem Definition & App Concept", wt: 2, d: [
+            "Problem is highly relevant, clearly articulated, and well-justified; concept and USP are compelling and clearly differentiated.",
+            "Clear problem and concept with reasonable justification.",
+            "Problem/concept stated but rationale is weak or unclear.",
+            "No clear problem or concept presented."],
+            k: "+Relevant problem|+Clearly articulated|+Compelling USP|+Well justified|-Weak rationale|-Vague concept|-Not differentiated|-No real problem" },
+          { name: "Feature Descriptions & Use Cases", wt: 2, d: [
+            "Features are comprehensively described, clearly tied to the problem, with detailed user journeys and expected outcomes.",
+            "Most features described with reasonable clarity and detail.",
+            "Features listed but descriptions are vague or incomplete.",
+            "No meaningful feature description provided."],
+            k: "+Detailed user journeys|+Tied to the problem|+Clear outcomes|-Vague descriptions|-Incomplete features|-Not linked to problem|-No use cases" },
+          { name: "High-Fidelity UX Prototype", wt: 4, d: [
+            "Complete, polished high-fidelity prototype covering the full user journey; strong adherence to iOS Human Interface Guidelines; interactions and transitions clearly demonstrated.",
+            "Covers most screens and flows with general adherence to iOS design standards.",
+            "Partial screens, or navigation flow that is unclear or incomplete.",
+            "No prototype, or screens unrelated to the proposed app."],
+            k: "+Polished hi-fi|+Full user journey|+Follows HIG|+Clear transitions|-Partial screens|-Unclear navigation|-Not high-fidelity|-Ignores HIG|-Inconsistent UI" },
+          { name: "Tools, Frameworks & MVP Scope Justification", wt: 2, d: [
+            "Well-reasoned justification of chosen tools/frameworks/services; MVP scope is realistic, clearly defined, and approval-ready.",
+            "Reasonable justification and scope definition with minor gaps.",
+            "Tools listed with little justification; MVP scope unclear.",
+            "No justification or scope provided."],
+            k: "+Well-reasoned choices|+Realistic MVP scope|+Approval-ready|-Little justification|-Scope unclear|-Over-ambitious|-Under-scoped" },
+        ] },
+        { n: 2, name: "Implementation of MVP & Presentation", wt: 20, mand: 1, subs: [
+          { name: "Core Feature Implementation & Functionality", wt: 8, d: [
+            "All core features from the approved proposal, including the two chosen mandatory platform features, are implemented and fully functional.",
+            "Most key features implemented with minor bugs.",
+            "Some features missing or incomplete.",
+            "Major features not functional or missing."],
+            k: "+All features working|+Both platform features done|+Matches proposal|-Minor bugs|-Missing features|-Crashes|-Platform feature incomplete|-Deviates from proposal" },
+          { name: "Mandatory External API / Backend Integration (LO3)", wt: 4, d: [
+            "A genuine external API or backend service (e.g. a REST API, Firebase, or serverless function) is integrated and central to the app’s core purpose, with data genuinely fetched, synced, or persisted.",
+            "External integration present and functional, though not deeply central to the app.",
+            "Integration attempted but unreliable, incomplete, or superficial (e.g. a single hardcoded call).",
+            "No external API or backend integration present."],
+            k: "+Central to the app|+Real data fetched|+Handles errors well|+Data persisted|-Not central|-Hardcoded call|-Unreliable|-No loading/error states|-No integration" },
+          { name: "Workflow, Navigation & UI Integration", wt: 3, d: [
+            "Smooth, logical, and consistent user experience across all functions; UI elements well connected and intuitive.",
+            "Mostly consistent experience with minor flaws.",
+            "Experience is inconsistent, cluttered, or unclear.",
+            "App lacks a usable or coherent flow."],
+            k: "+Smooth navigation|+Consistent UI|+Intuitive|-Inconsistent flow|-Cluttered|-Dead ends|-Confusing navigation" },
+          { name: "Viva — Work Product, Understanding & Skill", wt: 5, d: [
+            "Clearly the student’s own work; confidently explains any part of the code on request, justifies design decisions, and handles a live problem-solving question well.",
+            "Good explanation of structure and functionality with minor gaps in understanding or skill.",
+            "Adequate but shallow answers; struggles to justify decisions or handle follow-up questions.",
+            "Unable to explain the work, cannot demonstrate ownership, or avoids direct questions."],
+            k: "+Clearly own work|+Explains code confidently|+Justifies decisions|+Solved live problem|-Shallow answers|-Struggled with follow-ups|-Could not explain code|-Ownership doubts|-Avoided questions" },
+        ] },
+        { n: 3, name: "Implementation of Advanced iOS SDK", wt: 20, mand: 1,
+          note: "Any ML/AI feature must run on-device (Core ML, Vision, Natural Language, Create ML). Features relying on an external/cloud AI or LLM API score zero on this component. A basic external API call already credited under Component 2 cannot be re-used here. Push Notifications, Core Data and Face ID/Touch ID are reserved for Component 2.",
+          subs: [
+          { name: "Implementation & Integration", wt: 10, d: [
+            "Advanced SDK feature(s) (e.g. MapKit, Vision, Core ML, ARKit, or a deeper external API/backend implementation) are deeply integrated into the core app logic and meaningfully enhance the user experience — comprehensive usage, not a token gesture.",
+            "Feature is functional and integrated with the main app flow.",
+            "Limited or buggy integration with minimal use of the SDK.",
+            "Feature fails to work, is not present, or is only a token/hardcoded implementation (e.g. a single static map pin, or a chatbot backed by an external/cloud LLM API rather than on-device inference)."],
+            k: "+Deeply integrated|+Comprehensive SDK use|+Enhances the UX|-Token usage|-Buggy|-Minimal SDK use|-Static/hardcoded|-Cloud AI/LLM used|-Reserved feature used" },
+          { name: "Relevance to Problem Domain", wt: 5, d: [
+            "Feature clearly adds value and is tightly aligned with the app’s core purpose.",
+            "Feature is useful but not essential to the core idea.",
+            "Feature has questionable benefit or relevance to the app.",
+            "Feature is unrelated to the app’s core functionality."],
+            k: "+Tightly aligned|+Adds real value|-Not essential|-Questionable benefit|-Unrelated to app" },
+          { name: "Technical Complexity", wt: 5, d: [
+            "Demonstrates advanced use of iOS SDK capabilities well beyond typical requirements (e.g. combining multiple APIs, geofencing, on-device inference with a real model, custom data handling, or a genuinely advanced backend implementation).",
+            "Uses moderately complex APIs or tools correctly.",
+            "Simple enhancement with low technical depth.",
+            "No genuine advanced implementation attempted."],
+            k: "+Multiple APIs combined|+On-device inference|+Geofencing/real-time|+Custom data handling|-Simple enhancement|-Low technical depth|-Baseline API reused" },
+        ] },
+        { n: 4, name: "Unit Tests, Accessibility & Documentation", wt: 15, subs: [
+          { name: "Unit Test Coverage", wt: 3, d: [
+            "Tests cover all major logic, components, and edge cases.",
+            "Most core logic tested; a few gaps remain.",
+            "Few or only shallow tests present.",
+            "Little to no tests written."],
+            k: "+Major logic covered|+Edge cases tested|-Coverage gaps|-Shallow tests|-Very few tests|-No tests" },
+          { name: "Unit Test Quality", wt: 3, d: [
+            "Clear, maintainable, meaningful assertions written with Swift Testing; tests run cleanly.",
+            "Valid tests, partially documented or occasionally failing.",
+            "Poorly written tests or unreliable execution.",
+            "Non-functional or placeholder tests."],
+            k: "+Meaningful assertions|+Swift Testing used|+Runs cleanly|-Failing tests|-XCTest used|-Placeholder tests|-Poorly named|-Flaky" },
+          { name: "Accessibility Standards (VoiceOver, Dynamic Type, etc.)", wt: 3, d: [
+            "Fully follows iOS accessibility guidelines across the app.",
+            "Mostly compliant with minor oversights.",
+            "Some effort but lacks consistency.",
+            "Accessibility not addressed."],
+            k: "+VoiceOver labels|+Dynamic Type supported|+Good contrast|-Missing labels|-Fixed font sizes|-Inconsistent support|-Not addressed" },
+          { name: "Inclusive Design Practices", wt: 2, d: [
+            "Design is thoughtful toward diverse user needs and real-world usage scenarios.",
+            "Shows awareness of inclusive design needs.",
+            "Limited awareness; implemented without full context.",
+            "No inclusive design features or considerations."],
+            k: "+Considers diverse users|+Real-world scenarios|-Limited awareness|-No inclusive considerations" },
+          { name: "Documentation & Learning Outcomes Reflection", wt: 4, d: [
+            "Code is well-commented and modular; final report is well-organised with an insightful, specific reflection addressing each of LO1–LO4, including a comparison across at least two device types for LO1.",
+            "Reasonably documented code and report, generally complete, with a reflection that touches each learning outcome.",
+            "Minimal comments/documentation, or a reflection that is generic and does not clearly address each outcome.",
+            "No meaningful documentation, report, or learning outcomes reflection provided."],
+            k: "+Well-commented|+Modular code|+Insightful LO reflection|+Two-device comparison|-Sparse comments|-Generic reflection|-LOs missing|-No device comparison|-LLM use undocumented|-Report disorganised" },
+        ] },
+        { n: 5, name: "Above and Beyond", wt: 25,
+          note: "Subcomponent marks sum to 29 (raw); the component score is capped at 25 if the raw total exceeds it.",
+          subs: [
+          { name: "Creativity & Innovation", wt: 7, d: [
+            "Features or design show significant creativity, polish, or innovation beyond the coursework brief.",
+            "Some creative design or a unique approach is visible.",
+            "Minimal extra creativity or enhancement.",
+            "No attempt beyond the stated requirements."],
+            k: "+Original idea|+Goes beyond the brief|+Innovative features|-Brief only|-Derivative|-No extra effort" },
+          { name: "Technical Sophistication", wt: 10, d: [
+            "Applies advanced techniques or architectural improvements beyond standard needs (e.g. clean MVVM, dependency injection, multiple well-integrated advanced features, performance optimisation).",
+            "Uses a solid structure with some added complexity.",
+            "Basic structure, not exceeding typical effort.",
+            "No complexity or effort beyond the required baseline."],
+            k: "+Clean MVVM|+Dependency injection|+Performance aware|+Multiple advanced features|-Basic structure|-Massive views|-No separation of concerns" },
+          { name: "Multi-Device Design & Adaptation (LO1)", wt: 5, d: [
+            "App is thoughtfully designed and implemented across at least two device types (e.g. iPhone and iPad) with genuine layout/navigation adaptation (e.g. size classes, NavigationSplitView), and the final report justifies these platform-specific design choices in detail.",
+            "Some adaptation attempted across device types with a reasonable justification in the report.",
+            "Minimal or superficial adaptation (e.g. the same layout simply stretched), with little justification.",
+            "No attempt at multi-device design, or no reflection/justification provided."],
+            k: "+iPhone and iPad adapted|+Size classes/split view|+Justified in report|-Stretched layout|-Superficial adaptation|-No justification|-iPhone only" },
+          { name: "Polish & User Experience", wt: 4, d: [
+            "The app feels finished and delightful to use — thoughtful micro-interactions, animations, and well-crafted empty/error states throughout.",
+            "Generally polished with good attention to detail; minor rough edges.",
+            "Functional but rough — limited polish or inconsistent finishing touches.",
+            "No attention to polish; interface feels unfinished or inconsistent."],
+            k: "+Delightful animations|+Great empty/error states|+Feels finished|-Rough edges|-Missing empty states|-Unfinished|-Inconsistent styling" },
+          { name: "Overall Code Quality & Architecture", wt: 3, d: [
+            "Clean, modular, well-documented, and maintainable codebase throughout the project.",
+            "Reasonable structure and clarity in the code.",
+            "Code exists but lacks structure or scalability.",
+            "Code is disorganised or unmaintainable."],
+            k: "+Clean and modular|+Maintainable|+Well documented|-Disorganised|-Duplicated code|-Poor naming|-Hard to scale" },
+        ] },
+        { n: 6, name: "In-Class Tutorial 4 (Marked)", wt: 10, subs: [
+          { name: "Feature Checklist (Tab Bar Shell, Stats Screen, Map of Games, Daily Challenge, Share Your Score, Settings)", wt: 4, d: [
+            "All six required items are fully functional: Tab Bar Shell (4 tabs), Stats Screen (totals, bests, per-mode chart), Map of Games (pins from Core Location), Daily Challenge (scheduled local notification), Share Your Score (ShareLink), and Settings (toggle, time picker, reset with confirmation).",
+            "Most of the six required items implemented and working, with only minor gaps.",
+            "Roughly half of the required items implemented, or several only partially working.",
+            "Few or none of the required items implemented."],
+            k: "+All six items working|+Tab bar shell|+Stats chart|+Map pins|+Daily notification|+ShareLink|+Settings with confirmation|-Items missing|-Chart missing|-Map incomplete|-Notification not scheduled|-Reset without confirmation" },
+          { name: "Code Quality & Git Usage", wt: 2, d: [
+            "Code is clean, well-organised, and committed to Git with clear, meaningful commit history.",
+            "Reasonably organised code with regular commits.",
+            "Code works but is poorly organised; minimal or unclear commit history.",
+            "No meaningful code or Git usage."],
+            k: "+Clean structure|+Meaningful commits|-Few commits|-Unclear history|-Poor organisation|-No Git usage" },
+          { name: "Understanding & In-Lab Explanation", wt: 2, d: [
+            "Student clearly explains implementation choices and demonstrates strong understanding when questioned during the lab.",
+            "Reasonable explanation with minor gaps in understanding.",
+            "Limited explanation or understanding shown.",
+            "Unable to explain the work completed."],
+            k: "+Explains clearly|+Strong understanding|-Limited explanation|-Could not explain" },
+          { name: "Creativity & Extension", wt: 2, d: [
+            "Goes beyond the required items with a thoughtful creative extension (e.g. richer chart interactions, custom map annotations, extra settings options, or a unique take on the daily challenge).",
+            "Some minor creative touches beyond the baseline requirements.",
+            "Requirements met with no attempt at extension.",
+            "No effort beyond the bare minimum, or requirements incomplete."],
+            k: "+Creative extension|+Custom annotations|+Richer charts|-Bare minimum|-No extension" },
+        ] },
+      ];
+      R.forEach((c) => c.subs.forEach((s, i) => (s.id = "c" + c.n + "s" + (i + 1))));
+      const BANDS = [["Excellent (9–10)", "c0"], ["Good (4–8)", "c1"], ["Bare Minimum (1–3)", "c2"], ["Not Acceptable (0)", "c3"]];
+      const bandOf = (m) => (m >= 9 ? 0 : m >= 4 ? 1 : m >= 1 ? 2 : 3);
+      const r2 = (n) => Math.round(n * 100) / 100;
+
+      /* ===== state ===== */
+      let PW = "", P = [], F = { q: "", f: "all" }, cur = null, D = null, step = 0, saveT = null, dirtyFlag = false;
+      const fresh = () => ({ marks: {}, kw: {}, cmt: {}, final: "", ts: 0 });
+      try { PW = sessionStorage.getItem("mk_pw") || ""; } catch (_) {}
+
+      function calc() {
+        const out = R.map((c) => {
+          let raw = 0, n = 0;
+          c.subs.forEach((s) => {
+            const m = D.marks[s.id];
+            if (m != null) { n++; raw += (m / 10) * s.wt; }
+          });
+          return { c, raw, n, score: Math.min(raw, c.wt) };
+        });
+        return { out, total: out.reduce((a, x) => a + x.score, 0), marked: out.reduce((a, x) => a + x.n, 0), all: out.reduce((a, x) => a + x.c.subs.length, 0) };
+      }
+
+      /* ===== login ===== */
+      function login(msg) {
+        $("app").innerHTML =
+          '<div class="wrap" style="max-width:420px;margin-top:70px"><h1>CW Marker</h1><div class="sub">iOS Application Development · BSCCOMP25.1P</div><div class="card">' +
+          '<div class="lbl">Password</div><input type="password" id="pw" placeholder="••••••••" />' +
+          (msg ? '<div class="msg">' + esc(msg) + "</div>" : "") +
+          '<button class="btn" style="width:100%;margin-top:12px" onclick="doLogin()">Unlock</button></div></div>';
+        $("pw").onkeydown = (e) => e.key === "Enter" && doLogin();
+        $("pw").focus();
+      }
+      async function doLogin() {
+        PW = $("pw").value;
+        await loadList(true);
+      }
+      async function loadList(fromLogin) {
+        try {
+          P = await rpc("marker_list", { p_pw: PW });
+          try { sessionStorage.setItem("mk_pw", PW); } catch (_) {}
+          picker();
+        } catch (e) {
+          PW = "";
+          try { sessionStorage.removeItem("mk_pw"); } catch (_) {}
+          login(fromLogin ? (/password/i.test(e.message) ? "Incorrect password." : e.message) : "");
+        }
+      }
+
+      /* ===== picker ===== */
+      function picker() {
+        cur = null;
+        const m = P.filter((s) => s.updated_at).length;
+        $("app").innerHTML =
+          '<div class="wrap"><div class="row"><div><h1>Select student</h1><div class="sub" style="margin:0">' + m + " of " + P.length + ' have marks saved</div></div><div class="sp"></div>' +
+          '<button class="btn g sm" onclick="loadList()">↻ Refresh</button><button class="btn g sm" onclick="logout()">Lock</button></div>' +
+          '<input type="text" id="q" placeholder="Search name, index or token…" style="margin-top:16px" value="' + esc(F.q) + '" />' +
+          '<div class="chips" id="fchips"></div><div id="plist"></div></div>';
+        $("q").oninput = () => { F.q = $("q").value; plist(); };
+        plist();
+      }
+      function plist() {
+        $("fchips").innerHTML = [["all", "All"], ["todo", "Not marked"], ["done", "Marked"]]
+          .map(([k, l]) => '<span class="chip ' + (F.f === k ? "on" : "") + '" onclick="F.f=\'' + k + '\';plist()">' + l + "</span>").join("");
+        const q = F.q.trim().toLowerCase();
+        const rows = P.filter((s) => (F.f === "all" || (F.f === "done") === !!s.updated_at) && (!q || [s.student_name, s.student_index, s.token].join(" ").toLowerCase().includes(q)));
+        $("plist").innerHTML = rows.length
+          ? rows.map((s) =>
+              '<div class="stu" onclick="openStudent(\'' + esc(s.token) + '\')"><div class="sp"><b>' + esc(s.student_name || s.token) + '</b><div class="mono">' + esc(s.student_index || "") + " · " + esc(s.token) + "</div></div>" +
+              (s.updated_at ? '<span class="pill done">' + (s.total != null ? Number(s.total).toFixed(1) + " / 100" : "saved") + "</span>" : '<span class="pill">not marked</span>') + "</div>"
+            ).join("")
+          : '<div class="sub" style="text-align:center;padding:24px">No students match.</div>';
+      }
+      function logout() {
+        PW = "";
+        try { sessionStorage.removeItem("mk_pw"); } catch (_) {}
+        login();
+      }
+
+      /* ===== open + sheet ===== */
+      async function openStudent(token) {
+        cur = P.find((s) => s.token === token);
+        D = fresh();
+        try {
+          const m = await rpc("marker_get", { p_pw: PW, p_token: token });
+          if (m && m.data) D = Object.assign(fresh(), m.data);
+        } catch (e) { alert(e.message); }
+        try {
+          const l = JSON.parse(localStorage.getItem("mk_" + token) || "null");
+          if (l && (l.ts || 0) > (D.ts || 0)) D = Object.assign(fresh(), l);
+        } catch (_) {}
+        step = 0;
+        dirtyFlag = false;
+        sheet();
+      }
+      function sheet() {
+        $("app").innerHTML =
+          '<div class="top"><div class="in"><button class="btn g sm" onclick="back()">← Students</button><div class="sp"><b>' + esc(cur.student_name || cur.token) +
+          '</b> <span class="mono">' + esc(cur.student_index || "") + " · " + esc(cur.token) + '</span></div><div class="tot" id="tot"></div><div class="sv" id="sv">Saved</div>' +
+          '<button class="btn ok sm" onclick="save()">Save</button></div></div><div class="wrap"><div class="steps" id="steps"></div><div id="body"></div></div>';
+        renderStep();
+      }
+      function back() {
+        if (dirtyFlag && !confirm("You have unsaved changes. Leave anyway?")) return;
+        clearTimeout(saveT);
+        loadList();
+      }
+      function stepper() {
+        const { out } = calc();
+        $("steps").innerHTML =
+          out.map((x, i) =>
+            '<div class="st ' + (step === i ? "on" : "") + '" onclick="go(' + i + ')">C' + x.c.n + "<b>" + r2(x.score) + "/" + x.c.wt + "</b>" + x.n + "/" + x.c.subs.length + "</div>"
+          ).join("") + '<div class="st ' + (step === 6 ? "on" : "") + '" onclick="go(6)">Summary<b>Σ</b>final</div>';
+        const t = calc();
+        $("tot").innerHTML = r2(t.total) + " <small>/ 100 · " + t.marked + "/" + t.all + " marked</small>";
+      }
+      function go(i) {
+        step = i;
+        renderStep();
+        window.scrollTo({ top: 0 });
+      }
+      function renderStep() {
+        stepper();
+        $("body").innerHTML = step < 6 ? compHtml(R[step]) : summaryHtml();
+        if (step < 6) R[step].subs.forEach((s) => card(s.id));
+        $("body").insertAdjacentHTML("beforeend", '<div class="nav"><button class="btn g" ' + (step === 0 ? "disabled" : "") + ' onclick="go(' + (step - 1) + ')">← Previous</button>' +
+          (step < 6 ? '<button class="btn" onclick="go(' + (step + 1) + ')">' + (step === 5 ? "Summary →" : "Next →") + "</button>" : "") + "</div>");
+      }
+      function compHtml(c) {
+        return (
+          '<div class="ch"><h2>Component ' + c.n + ": " + esc(c.name) + '</h2><div class="sub" style="margin:4px 0 0">' + c.wt + "% of coursework" + (c.mand ? " · <b style=\"color:var(--warn)\">mandatory — a zero fails the module</b>" : "") + "</div>" +
+          (c.note ? '<div class="note">' + esc(c.note) + "</div>" : "") +
+          (c.n === 3 ? '<div style="margin-top:10px"><button class="btn g sm" onclick="zeroComp(3)">Set whole component to 0 (cloud AI / not present)</button></div>' : "") + "</div>" +
+          c.subs.map((s) =>
+            '<div class="card sc" id="sc-' + s.id + '"><div class="sh"><b>' + esc(s.name) + '</b><span class="mono">weight ' + s.wt + '</span></div>' +
+            '<input type="range" class="rg" min="0" max="10" step="1" value="' + (D.marks[s.id] ?? 5) + '" oninput="setMark(\'' + s.id + "',this.value)\" onchange=\"setMark('" + s.id + "',this.value)\" />" +
+            '<div class="tick">' + [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => "<span>" + n + "</span>").join("") + "</div>" +
+            '<div class="row"><div class="rd sp" id="rd-' + s.id + '"></div><button class="btn g sm" onclick="setMark(\'' + s.id + "',0,1)\">Set 0</button></div>" +
+            '<div class="bd" id="bd-' + s.id + '"></div>' +
+            "<details><summary>All band descriptors</summary>" + s.d.map((t, i) => '<p><b class="' + BANDS[i][1] + '">' + BANDS[i][0] + ":</b> " + esc(t) + "</p>").join("") + "</details>" +
+            '<div class="lbl">Feedback keywords</div><div class="chips" style="margin-top:0">' +
+            s.k.split("|").map((w, i) => {
+              const t = w[0] === "+" ? "p" : w[0] === "-" ? "n" : "", txt = /[+-]/.test(w[0]) ? w.slice(1) : w;
+              return '<span class="chip ' + t + ((D.kw[s.id] || []).includes(txt) ? " on" : "") + '" onclick="kw(\'' + s.id + "'," + i + ',this)">' + esc(txt) + "</span>";
+            }).join("") + "</div></div>"
+          ).join("") +
+          '<div class="card"><div class="lbl">Component ' + c.n + " — custom feedback</div><textarea id=\"cmt\" placeholder=\"Anything specific to say about this component…\" oninput=\"setCmt(" + c.n + ',this.value)">' + esc(D.cmt[c.n] || "") + "</textarea></div>" +
+          '<div class="cbox"><span>Component ' + c.n + " score</span><span id=\"ct\"></span></div>"
+        );
+      }
+      function sub(id) {
+        for (const c of R) for (const s of c.subs) if (s.id === id) return [c, s];
+      }
+      function card(id) {
+        const [c, s] = sub(id), m = D.marks[id], el = $("sc-" + id);
+        if (!el) return;
+        el.classList.toggle("mk", m != null);
+        if (m == null) {
+          $("rd-" + id).innerHTML = '<span style="color:var(--m)">Not marked — move the slider</span>';
+          $("bd-" + id).innerHTML = "";
+        } else {
+          const b = bandOf(m);
+          $("rd-" + id).innerHTML = m + " / 10 → " + r2((m / 10) * s.wt) + " of " + s.wt;
+          $("bd-" + id).innerHTML = '<b class="' + BANDS[b][1] + '">' + BANDS[b][0] + "</b>" + esc(s.d[b]);
+        }
+        const x = calc().out[c.n - 1];
+        if ($("ct")) $("ct").innerHTML = r2(x.score) + " / " + c.wt + (x.raw > c.wt ? " (raw " + r2(x.raw) + ", capped)" : "") + " · " + x.n + "/" + c.subs.length + " marked";
+      }
+      function setMark(id, v, setSlider) {
+        D.marks[id] = +v;
+        if (setSlider) document.querySelector("#sc-" + id + " .rg").value = v;
+        card(id);
+        stepper();
+        dirty();
+      }
+      function zeroComp(n) {
+        if (!confirm("Set every subcomponent in Component " + n + " to 0?")) return;
+        R[n - 1].subs.forEach((s) => (D.marks[s.id] = 0));
+        renderStep();
+        dirty();
+      }
+      function kw(id, i, el) {
+        const [, s] = sub(id), w = s.k.split("|")[i], txt = /[+-]/.test(w[0]) ? w.slice(1) : w;
+        const a = (D.kw[id] = D.kw[id] || []), p = a.indexOf(txt);
+        p >= 0 ? a.splice(p, 1) : a.push(txt);
+        el.classList.toggle("on");
+        dirty();
+      }
+      function setCmt(n, v) { D.cmt[n] = v; dirty(); }
+
+      /* ===== summary ===== */
+      function summaryHtml() {
+        const t = calc(), mandZero = t.out.filter((x) => x.c.mand && x.n === x.c.subs.length && x.score === 0);
+        return (
+          '<div class="ch"><h2>Summary & final feedback</h2></div><div class="card"><table><tr><th>Component</th><th class="r">Marked</th><th class="r">Score</th></tr>' +
+          t.out.map((x) => "<tr><td>C" + x.c.n + " · " + esc(x.c.name) + '</td><td class="r">' + x.n + "/" + x.c.subs.length + '</td><td class="r">' + r2(x.score) + " / " + x.c.wt + "</td></tr>").join("") +
+          '<tr><td><b>Total</b></td><td></td><td class="r"><b>' + r2(t.total) + " / 100</b></td></tr></table></div>" +
+          (t.marked < t.all ? '<div class="flag warn">' + (t.all - t.marked) + " subcomponent(s) not marked yet — they count as 0.</div>" : "") +
+          (mandZero.length ? '<div class="flag bad">Zero in mandatory component(s) ' + mandZero.map((x) => "C" + x.c.n).join(", ") + " — fails the module regardless of total.</div>" : "") +
+          (t.total >= 40 ? '<div class="flag good">Overall ' + r2(t.total) + "% — meets the 40% pass requirement.</div>" : '<div class="flag bad">Overall ' + r2(t.total) + "% — below the 40% pass requirement.</div>") +
+          '<div class="card"><div class="lbl">Final feedback (whole submission)</div><textarea id="fin" style="min-height:140px" placeholder="Overall feedback…" oninput="D.final=this.value;dirty()">' + esc(D.final || "") + "</textarea></div>" +
+          '<div class="row"><button class="btn ok" onclick="save()">Save marks</button><button class="btn g" onclick="copyFb()">Copy feedback outline</button></div>'
+        );
+      }
+      function copyFb() {
+        const t = calc();
+        let s = cur.student_name + " (" + cur.student_index + ") — total " + r2(t.total) + "/100\n";
+        R.forEach((c, i) => {
+          s += "\nC" + c.n + " " + c.name + " — " + r2(t.out[i].score) + "/" + c.wt + "\n";
+          c.subs.forEach((x) => {
+            const m = D.marks[x.id];
+            s += "• " + x.name + ": " + (m == null ? "not marked" : m + "/10") + ((D.kw[x.id] || []).length ? " — " + D.kw[x.id].join(", ") : "") + "\n";
+          });
+          if (D.cmt[c.n]) s += "Note: " + D.cmt[c.n] + "\n";
+        });
+        s += "\nFinal feedback:\n" + (D.final || "");
+        navigator.clipboard.writeText(s).then(() => alert("Copied."), () => alert("Copy failed."));
+      }
+
+      /* ===== save ===== */
+      function dirty() {
+        dirtyFlag = true;
+        D.ts = Date.now();
+        try { localStorage.setItem("mk_" + cur.token, JSON.stringify(D)); } catch (_) {}
+        $("sv").textContent = "Unsaved…";
+        clearTimeout(saveT);
+        saveT = setTimeout(save, 2500);
+      }
+      async function save() {
+        clearTimeout(saveT);
+        const t = calc();
+        D.comp = {};
+        t.out.forEach((x) => (D.comp[x.c.n] = { raw: r2(x.raw), score: r2(x.score), weight: x.c.wt }));
+        D.total = r2(t.total);
+        D.ts = Date.now();
+        $("sv").textContent = "Saving…";
+        try {
+          await rpc("marker_save", { p_pw: PW, p_token: cur.token, p_name: cur.student_name, p_index: cur.student_index, p_data: D, p_total: D.total });
+          dirtyFlag = false;
+          cur.total = D.total;
+          cur.updated_at = new Date().toISOString();
+          $("sv").textContent = "Saved ✓ " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        } catch (e) {
+          $("sv").textContent = "Save failed — kept on this device";
+          alert("Save failed: " + e.message);
+        }
+      }
+      window.addEventListener("beforeunload", (e) => { if (dirtyFlag) { e.preventDefault(); e.returnValue = ""; } });
+
+      PW ? loadList() : login();
+    </script>
+  </body>
+</html>
