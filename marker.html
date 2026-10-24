@@ -610,7 +610,7 @@
           '<div class="lbl">Password</div><input type="password" id="pw" placeholder="••••••••" />' +
           (msg ? '<div class="msg">' + esc(msg) + "</div>" : "") +
           '<button class="btn" style="width:100%;margin-top:12px" onclick="doLogin()">Unlock</button></div></div>';
-        $("pw").onkeydown = (e) => e.key === "Enter" && doLogin();
+        $("pw").onkeydown = (e) => { if (e.key === "Enter") doLogin(); };
         $("pw").focus();
       }
       async function doLogin() {
