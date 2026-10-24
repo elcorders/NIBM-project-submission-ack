@@ -670,7 +670,7 @@
         tok.classList.remove("bad");
         $("tokMsg").innerHTML = "";
       };
-      tok.onkeydown = (e) => e.key === "Enter" && !$("tokBtn").disabled && $("tokBtn").click();
+      tok.onkeydown = (e) => { if (e.key === "Enter" && !$("tokBtn").disabled) $("tokBtn").click(); };
       $("tokBtn").onclick = () => enterQueue();
       const tmsg = (html, cls) => ($("tokMsg").innerHTML = '<div class="msg ' + (cls || "") + '">' + html + "</div>");
 
@@ -855,7 +855,7 @@
         $("pw").value = "";
         $("pwMsg").innerHTML = "";
       }
-      $("pw").onkeydown = (e) => e.key === "Enter" && adminLogin();
+      $("pw").onkeydown = (e) => { if (e.key === "Enter") adminLogin(); };
       async function adminLogin() {
         try {
           const cfg = await get("config?key=eq.admin_password&select=value");
